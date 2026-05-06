@@ -7,10 +7,26 @@ import QRCodeDisplay from '../components/QRCodeDisplay'
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001'
 const MAX_OPTIONS = 6
 
+const BADGE_CLASS: Record<string, string> = {
+  poll: 'bg-blue-100 text-blue-700',
+  open_ended: 'bg-purple-100 text-purple-700',
+  word_cloud: 'bg-pink-100 text-pink-700',
+  scales: 'bg-orange-100 text-orange-700',
+  ranking: 'bg-teal-100 text-teal-700',
+}
+
+const TYPE_CONFIG: { type: QuestionType; label: string; color: string }[] = [
+  { type: 'poll',       label: 'Poll 投票',  color: 'blue'   },
+  { type: 'open_ended', label: '開放作答',    color: 'purple' },
+  { type: 'word_cloud', label: '文字雲',      color: 'pink'   },
+  { type: 'scales',     label: '量尺評分',    color: 'orange' },
+  { type: 'ranking',    label: '排序',        color: 'teal'   },
+]
+
 interface LocalQuestion {
   type: QuestionType
   title: string
-  options: string[]
+  options: string[]       // poll/ranking: 選項; scales: [minLabel, maxLabel]
 }
 
 export default function TeacherDashboard() {
@@ -56,8 +72,8 @@ export default function TeacherDashboard() {
   async function addQuestion() {
     if (!activity || !newQ.title.trim()) return
     const validOptions = newQ.options.filter(o => o.trim())
-    if (newQ.type === 'poll' && validOptions.length < 2) {
-      setError('Poll 題目至少需要 2 個選項')
+    if ((newQ.type === 'poll' || newQ.type === 'ranking') && validOptions.length < 2) {
+      setError(`${newQ.type === 'poll' ? 'Poll' : '排序'} 題目至少需要 2 個項目`)
       return
     }
     setAddingQ(true)
@@ -70,7 +86,11 @@ export default function TeacherDashboard() {
           activityId: activity.id,
           type: newQ.type,
           title: newQ.title.trim(),
-          options: newQ.type === 'poll' ? validOptions : undefined,
+          options: ['poll', 'ranking'].includes(newQ.type)
+            ? validOptions
+            : newQ.type === 'scales'
+              ? [newQ.options[0]?.trim() || '非常不同意', newQ.options[1]?.trim() || '非常同意']
+              : undefined,
           order: questions.length + 1,
         }),
       })
@@ -171,21 +191,27 @@ export default function TeacherDashboard() {
             <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col gap-4">
               <h2 className="text-xl font-semibold text-gray-700">新增題目</h2>
 
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setNewQ(prev => ({ ...prev, type: 'poll' }))}
-                  className={`flex-1 py-2 rounded-xl font-medium border-2 transition-colors ${newQ.type === 'poll' ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:border-blue-400'}`}
-                >
-                  投票（Poll）
-                </button>
-                <button
-                  onClick={() => setNewQ(prev => ({ ...prev, type: 'open_ended' }))}
-                  className={`flex-1 py-2 rounded-xl font-medium border-2 transition-colors ${newQ.type === 'open_ended' ? 'bg-purple-600 text-white border-purple-600' : 'border-gray-300 text-gray-600 hover:border-purple-400'}`}
-                >
-                  開放作答
-                </button>
+              {/* 題型選擇 */}
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                {TYPE_CONFIG.map(({ type, label, color }) => {
+                  const active = newQ.type === type
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => setNewQ(prev => ({ ...prev, type, options: type === 'scales' ? ['非常不同意', '非常同意'] : ['', ''] }))}
+                      className={`py-2 px-1 rounded-xl font-medium text-xs border-2 transition-colors ${
+                        active
+                          ? `bg-${color}-600 text-white border-${color}-600`
+                          : `border-gray-300 text-gray-600 hover:border-${color}-400`
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
               </div>
 
+              {/* 題目標題 */}
               <input
                 type="text"
                 value={newQ.title}
@@ -194,36 +220,60 @@ export default function TeacherDashboard() {
                 className="border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500"
               />
 
-              {newQ.type === 'poll' && (
+              {/* Poll / Ranking：多選項 */}
+              {(newQ.type === 'poll' || newQ.type === 'ranking') && (
                 <div className="flex flex-col gap-2">
-                  <p className="text-sm font-medium text-gray-600">選項（最多 {MAX_OPTIONS} 個）</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    {newQ.type === 'poll' ? `選項（最多 ${MAX_OPTIONS} 個）` : `排序項目（最多 ${MAX_OPTIONS} 個）`}
+                  </p>
                   {newQ.options.map((opt, i) => (
                     <div key={i} className="flex gap-2">
                       <input
                         type="text"
                         value={opt}
                         onChange={e => updateOption(i, e.target.value)}
-                        placeholder={`選項 ${i + 1}`}
+                        placeholder={`項目 ${i + 1}`}
                         className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-400"
                       />
                       {newQ.options.length > 2 && (
-                        <button
-                          onClick={() => removeOption(i)}
-                          className="px-3 text-red-400 hover:text-red-600 font-bold text-lg"
-                        >
-                          ×
-                        </button>
+                        <button onClick={() => removeOption(i)} className="px-3 text-red-400 hover:text-red-600 font-bold text-lg">×</button>
                       )}
                     </div>
                   ))}
                   {newQ.options.length < MAX_OPTIONS && (
-                    <button
-                      onClick={addOption}
-                      className="text-sm text-blue-600 hover:underline self-start"
-                    >
-                      ＋ 新增選項
+                    <button onClick={addOption} className="text-sm text-blue-600 hover:underline self-start">
+                      ＋ 新增項目
                     </button>
                   )}
+                </div>
+              )}
+
+              {/* Scales：左右標籤 */}
+              {newQ.type === 'scales' && (
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium text-gray-600">量尺標籤（1 ← → 10）</p>
+                  <div className="flex gap-3">
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-400 mb-1">左側（1）</p>
+                      <input
+                        type="text"
+                        value={newQ.options[0] ?? ''}
+                        onChange={e => updateOption(0, e.target.value)}
+                        placeholder="非常不同意"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-400"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-400 mb-1">右側（10）</p>
+                      <input
+                        type="text"
+                        value={newQ.options[1] ?? ''}
+                        onChange={e => updateOption(1, e.target.value)}
+                        placeholder="非常同意"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-400"
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -246,8 +296,8 @@ export default function TeacherDashboard() {
                     <div key={q.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
                       <span className="font-bold text-gray-400 w-6 shrink-0">{i + 1}</span>
                       <div className="flex-1">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full mr-2 ${q.type === 'poll' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>
-                          {q.type === 'poll' ? 'Poll' : '開放'}
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full mr-2 ${BADGE_CLASS[q.type] ?? 'bg-gray-100 text-gray-700'}`}>
+                          {TYPE_CONFIG.find(t => t.type === q.type)?.label ?? q.type}
                         </span>
                         <span className="text-gray-800">{q.title}</span>
                         {q.options && (

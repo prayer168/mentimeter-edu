@@ -4,6 +4,9 @@ import { Question } from '@shared/types'
 import { useSocket } from '../hooks/useSocket'
 import PollQuestion from '../components/questions/PollQuestion'
 import OpenEndedQuestion from '../components/questions/OpenEndedQuestion'
+import WordCloudQuestion from '../components/questions/WordCloudQuestion'
+import ScalesQuestion from '../components/questions/ScalesQuestion'
+import RankingQuestion from '../components/questions/RankingQuestion'
 
 function getOrCreateSessionId(): string {
   const key = 'menti_session_id'
@@ -121,17 +124,15 @@ export default function StudentAnswer() {
                 <p className="text-sm text-gray-400">已成功加入活動，請稍候</p>
               </div>
             ) : currentQuestion.type === 'poll' ? (
-              <PollQuestion
-                question={currentQuestion}
-                onAnswer={submitAnswer}
-                answered={answered}
-              />
+              <PollQuestion question={currentQuestion} onAnswer={submitAnswer} answered={answered} />
+            ) : currentQuestion.type === 'word_cloud' ? (
+              <WordCloudQuestion question={currentQuestion} onAnswer={submitAnswer} answered={answered} />
+            ) : currentQuestion.type === 'scales' ? (
+              <ScalesQuestion question={currentQuestion} onAnswer={submitAnswer} answered={answered} />
+            ) : currentQuestion.type === 'ranking' ? (
+              <RankingQuestion question={currentQuestion} onAnswer={submitAnswer} answered={answered} />
             ) : (
-              <OpenEndedQuestion
-                question={currentQuestion}
-                onAnswer={submitAnswer}
-                answered={answered}
-              />
+              <OpenEndedQuestion question={currentQuestion} onAnswer={submitAnswer} answered={answered} />
             )}
           </div>
         </div>

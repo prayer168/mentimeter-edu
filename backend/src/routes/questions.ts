@@ -18,8 +18,9 @@ router.post('/', async (req: Request, res: Response) => {
     return
   }
 
-  if (type !== 'poll' && type !== 'open_ended') {
-    res.status(400).send('type must be poll or open_ended')
+  const validTypes = ['poll', 'open_ended', 'word_cloud', 'scales', 'ranking']
+  if (!validTypes.includes(type)) {
+    res.status(400).send(`type must be one of: ${validTypes.join(', ')}`)
     return
   }
 

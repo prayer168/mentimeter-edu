@@ -4,8 +4,19 @@ import { Activity, Question, Answer } from '@shared/types'
 import { useSocket } from '../hooks/useSocket'
 import PollResult from '../components/questions/PollResult'
 import OpenEndedResult from '../components/questions/OpenEndedResult'
+import WordCloudResult from '../components/questions/WordCloudResult'
+import ScalesResult from '../components/questions/ScalesResult'
+import RankingResult from '../components/questions/RankingResult'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001'
+
+const TYPE_LABEL: Record<string, string> = {
+  poll: 'Poll', open_ended: '開放', word_cloud: '文字雲', scales: '量尺', ranking: '排序',
+}
+const TYPE_COLOR: Record<string, string> = {
+  poll: 'text-blue-300', open_ended: 'text-purple-300', word_cloud: 'text-pink-300',
+  scales: 'text-orange-300', ranking: 'text-teal-300',
+}
 
 export default function TeacherPresent() {
   const { activityId } = useParams<{ activityId: string }>()
@@ -101,8 +112,8 @@ export default function TeacherPresent() {
               }`}
             >
               <span className="font-bold mr-2">{i + 1}.</span>
-              <span className={`text-xs mr-1 ${q.type === 'poll' ? 'text-blue-300' : 'text-purple-300'}`}>
-                [{q.type === 'poll' ? 'Poll' : '開放'}]
+              <span className={`text-xs mr-1 ${TYPE_COLOR[q.type] ?? 'text-gray-300'}`}>
+                [{TYPE_LABEL[q.type] ?? q.type}]
               </span>
               {q.title}
             </button>
@@ -120,6 +131,12 @@ export default function TeacherPresent() {
               <div className="bg-gray-800 rounded-2xl p-6 shadow-xl">
                 {currentQuestion.type === 'poll' ? (
                   <PollResult question={currentQuestion} answers={answers} />
+                ) : currentQuestion.type === 'word_cloud' ? (
+                  <WordCloudResult question={currentQuestion} answers={answers} />
+                ) : currentQuestion.type === 'scales' ? (
+                  <ScalesResult question={currentQuestion} answers={answers} />
+                ) : currentQuestion.type === 'ranking' ? (
+                  <RankingResult question={currentQuestion} answers={answers} />
                 ) : (
                   <OpenEndedResult question={currentQuestion} answers={answers} />
                 )}

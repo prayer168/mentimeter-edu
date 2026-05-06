@@ -1,11 +1,11 @@
-export type QuestionType = 'poll' | 'open_ended'
+export type QuestionType = 'poll' | 'open_ended' | 'word_cloud' | 'scales' | 'ranking'
 
 export interface Question {
   id: string
   activityId: string
   type: QuestionType
   title: string
-  options?: string[]
+  options?: string[]   // poll/ranking: 選項; scales: [minLabel, maxLabel]
   order: number
 }
 
@@ -23,7 +23,7 @@ export interface Answer {
   id: string
   questionId: string
   sessionId: string
-  value: string
+  value: string        // poll/word_cloud: 文字; scales: "7"; ranking: JSON 陣列字串
   createdAt: string
 }
 
