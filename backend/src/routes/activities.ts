@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { supabase } from '../lib/supabase'
 import { Activity, Question } from '@shared/types'
-import { nanoid } from 'nanoid'
+import { requireAuth } from '../middleware/auth'
 
 const router = Router()
 
@@ -23,21 +23,20 @@ async function uniqueRoomCode(): Promise<string> {
   throw new Error('無法產生唯一房間碼')
 }
 
-router.post('/', async (req: Request, res: Response) => {
-  const { title, teacherId } = req.body as { title?: string; teacherId?: string }
+router.post('/', requireAuth, async (req: Request, res: Response) => {
+  const { title } = req.body as { title?: string }
   if (!title?.trim()) {
     res.status(400).send('title is required')
     return
   }
 
   const roomCode = await uniqueRoomCode()
-  const effectiveTeacherId = teacherId ?? 'anonymous-' + nanoid(8)
 
   const { data, error } = await supabase
     .from('activities')
     .insert({
       title: title.trim(),
-      teacher_id: effectiveTeacherId,
+      teacher_id: req.user!.id,
       room_code: roomCode,
       is_active: false,
       current_question_id: null,

@@ -10,7 +10,16 @@
       "Bash(npm run *)",
       "Bash(jobs -l)",
       "Bash(git rm *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git config *)",
+      "Bash(gh auth *)",
+      "Bash(command -v gh)",
+      "Read(//usr/local/bin/**)",
+      "PowerShell(Get-Command *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(pkill -f \"ts-node-dev\\\\|vite\")"
     ]
   }
 }

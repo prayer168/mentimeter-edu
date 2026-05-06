@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Activity, Question, QuestionType } from '@shared/types'
+import { useAuth } from '../contexts/AuthContext'
 import QRCodeDisplay from '../components/QRCodeDisplay'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001'
@@ -14,6 +15,8 @@ interface LocalQuestion {
 
 export default function TeacherDashboard() {
   const navigate = useNavigate()
+  const { user, session, signOut } = useAuth()
+
   const [activityTitle, setActivityTitle] = useState('')
   const [activity, setActivity] = useState<Activity | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
@@ -23,6 +26,13 @@ export default function TeacherDashboard() {
   const [newQ, setNewQ] = useState<LocalQuestion>({ type: 'poll', title: '', options: ['', ''] })
   const [addingQ, setAddingQ] = useState(false)
 
+  function authHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session?.access_token ?? ''}`,
+    }
+  }
+
   async function createActivity() {
     if (!activityTitle.trim()) return
     setCreating(true)
@@ -30,7 +40,7 @@ export default function TeacherDashboard() {
     try {
       const res = await fetch(`${BACKEND_URL}/activities`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({ title: activityTitle.trim() }),
       })
       if (!res.ok) throw new Error(await res.text())
@@ -55,7 +65,7 @@ export default function TeacherDashboard() {
     try {
       const res = await fetch(`${BACKEND_URL}/questions`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           activityId: activity.id,
           type: newQ.type,
@@ -102,7 +112,19 @@ export default function TeacherDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-center text-blue-800 mb-6">教師後台</h1>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-blue-800">教師後台</h1>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-500 hidden sm:block">{user?.email}</span>
+            <button
+              onClick={() => signOut()}
+              className="text-sm px-4 py-2 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
+            >
+              登出
+            </button>
+          </div>
+        </div>
 
         {!activity ? (
           <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col gap-4">
@@ -126,6 +148,7 @@ export default function TeacherDashboard() {
           </div>
         ) : (
           <div className="flex flex-col gap-6">
+            {/* QR Code + info */}
             <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col sm:flex-row items-center gap-6">
               <QRCodeDisplay url={joinUrl} roomCode={activity.roomCode} />
               <div className="flex-1">
@@ -144,6 +167,7 @@ export default function TeacherDashboard() {
               </div>
             </div>
 
+            {/* Add question */}
             <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col gap-4">
               <h2 className="text-xl font-semibold text-gray-700">新增題目</h2>
 
@@ -213,6 +237,7 @@ export default function TeacherDashboard() {
               </button>
             </div>
 
+            {/* Question list */}
             {questions.length > 0 && (
               <div className="bg-white rounded-2xl shadow-md p-6">
                 <h2 className="text-xl font-semibold text-gray-700 mb-3">題目列表</h2>
