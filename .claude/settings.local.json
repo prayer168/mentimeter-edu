@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npx supabase *)",
+      "Bash(docker info *)",
+      "PowerShell(New-Item *)",
+      "Bash(curl *)",
+      "Bash(npm run *)",
+      "Bash(jobs -l)",
+      "Bash(git rm *)",
+      "Bash(git add *)"
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+import { Router, Request, Response } from 'express'
+import { supabase } from '../lib/supabase'
+import { Question } from '@shared/types'
+
+const router = Router()
+
+router.post('/', async (req: Request, res: Response) => {
+  const { activityId, type, title, options, order } = req.body as {
+    activityId?: string
+    type?: string
+    title?: string
+    options?: string[]
+    order?: number
+  }
+
+  if (!activityId || !type || !title?.trim()) {
+    res.status(400).send('activityId, type, and title are required')
+    return
+  }
+
+  if (type !== 'poll' && type !== 'open_ended') {
+    res.status(400).send('type must be poll or open_ended')
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('questions')
+    .insert({
+      activity_id: activityId,
+      type,
+      title: title.trim(),
+      options: type === 'poll' ? (options ?? []) : null,
+      order: order ?? 1,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error(error)
+    res.status(500).send(error.message)
+    return
+  }
+
+  const question: Question = {
+    id: data.id,
+    activityId: data.activity_id,
+    type: data.type,
+    title: data.title,
+    options: data.options ?? undefined,
+    order: data.order,
+  }
+  res.json(question)
+})
+
+export default router
