@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import TeacherLogin from './pages/TeacherLogin'
 import TeacherDashboard from './pages/TeacherDashboard'
 import TeacherPresent from './pages/TeacherPresent'
+import TeacherResults from './pages/TeacherResults'
 import StudentJoin from './pages/StudentJoin'
 import StudentAnswer from './pages/StudentAnswer'
 
@@ -21,6 +22,10 @@ export default function App() {
           <Route
             path="/teacher/present/:activityId"
             element={<ProtectedRoute><TeacherPresent /></ProtectedRoute>}
+          />
+          <Route
+            path="/teacher/results/:activityId"
+            element={<ProtectedRoute><TeacherResults /></ProtectedRoute>}
           />
           <Route path="/join" element={<StudentJoin />} />
           <Route path="/answer/:roomCode" element={<StudentAnswer />} />
