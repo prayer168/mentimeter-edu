@@ -116,7 +116,7 @@ export default function StudentAnswer() {
       {/* overflow-y-auto 讓鍵盤彈起時內容可捲動 */}
       <div className="flex-1 overflow-y-auto">
         <div className="min-h-full flex flex-col justify-center px-4 py-6">
-          <div className="bg-white rounded-2xl shadow-lg p-5 w-full max-w-sm mx-auto">
+          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-5 w-full max-w-sm mx-auto">
             {!currentQuestion ? (
               <div className="flex flex-col items-center gap-3 py-10">
                 <div className="text-5xl animate-pulse">⏳</div>

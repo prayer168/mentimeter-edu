@@ -18,7 +18,7 @@ export default function ScalesQuestion({ question, onAnswer, answered }: Props) 
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <h2 className="text-lg font-bold text-center text-gray-800 leading-snug">
         {question.title}
       </h2>
@@ -31,17 +31,23 @@ export default function ScalesQuestion({ question, onAnswer, answered }: Props) 
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* 數字按鈕 1-10 */}
+          {/* 標籤列 */}
+          <div className="flex justify-between text-xs text-gray-400 px-1">
+            <span>1 — {minLabel}</span>
+            <span>{maxLabel} — 10</span>
+          </div>
+
+          {/* 數字按鈕：2行×5列，aspect-square 確保每格正方形，觸控面積足夠 */}
           <div className="grid grid-cols-5 gap-2">
             {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
               <button
                 key={n}
                 type="button"
                 onClick={() => setValue(n)}
-                className={`py-3 rounded-xl font-bold text-base border-2 transition-all active:scale-95 ${
+                className={`aspect-square w-full flex items-center justify-center rounded-xl font-bold text-lg border-2 transition-all active:scale-95 ${
                   value === n
                     ? 'bg-orange-500 border-orange-500 text-white shadow-md scale-105'
-                    : 'bg-white border-gray-300 text-gray-700 hover:border-orange-400'
+                    : 'bg-white border-gray-200 text-gray-700 active:border-orange-400'
                 }`}
               >
                 {n}
@@ -49,15 +55,14 @@ export default function ScalesQuestion({ question, onAnswer, answered }: Props) 
             ))}
           </div>
 
-          {/* 標籤 */}
-          <div className="flex justify-between text-xs text-gray-400 px-1">
-            <span>{minLabel}</span>
-            <span>{maxLabel}</span>
+          {/* 已選顯示 */}
+          <div className="h-10 flex items-center justify-center">
+            {value !== null && (
+              <p className="text-3xl font-bold text-orange-500 animate-[wordPop_0.2s_ease-out]">
+                {value} 分
+              </p>
+            )}
           </div>
-
-          {value !== null && (
-            <p className="text-center text-3xl font-bold text-orange-500">{value}</p>
-          )}
 
           <button
             type="submit"
