@@ -32,11 +32,8 @@ export default function StudentAnswer() {
     socket.emit('student:join_room', { roomCode, sessionId: sessionId.current })
 
     function onJoined({ success, error: err }: { success: boolean; error?: string }) {
-      if (success) {
-        setJoined(true)
-      } else {
-        setError(err ?? '加入失敗，請確認房間碼')
-      }
+      if (success) setJoined(true)
+      else setError(err ?? '加入失敗，請確認房間碼')
     }
 
     function onQuestionStarted({ question }: { question: Question }) {
@@ -72,7 +69,7 @@ export default function StudentAnswer() {
 
   if (!connected) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-blue-50">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-blue-50">
         <p className="text-gray-500">連線中，請稍候…</p>
       </div>
     )
@@ -80,9 +77,12 @@ export default function StudentAnswer() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-red-50 p-6 gap-4">
-        <p className="text-red-600 font-semibold text-lg">{error}</p>
-        <button onClick={() => navigate('/join')} className="text-blue-600 underline">
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-red-50 p-6 gap-4">
+        <p className="text-red-600 font-semibold text-lg text-center">{error}</p>
+        <button
+          onClick={() => navigate('/join')}
+          className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold"
+        >
           重新輸入房間碼
         </button>
       </div>
@@ -91,42 +91,56 @@ export default function StudentAnswer() {
 
   if (!joined) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-blue-50">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-blue-50">
         <p className="text-gray-500">加入活動中…</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 flex flex-col">
-      <header className="px-4 py-3 bg-blue-700 text-white flex items-center justify-between">
-        <span className="font-bold">Mentimeter EDU</span>
-        <span className="text-sm font-mono tracking-widest text-blue-200">{roomCode}</span>
+    /* min-h-[100dvh]：使用動態視口高度，鍵盤彈起時不會錯位 */
+    <div className="min-h-[100dvh] bg-gradient-to-br from-blue-50 to-purple-100 flex flex-col">
+      <header
+        className="px-4 py-3 bg-blue-700 text-white flex items-center justify-between shrink-0"
+        style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
+      >
+        <span className="font-bold text-sm">Mentimeter EDU</span>
+        <span className="text-xs font-mono tracking-widest text-blue-200 bg-blue-800 px-2 py-1 rounded-lg">
+          {roomCode}
+        </span>
       </header>
 
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-sm">
-          {!currentQuestion ? (
-            <div className="flex flex-col items-center gap-3 py-8">
-              <div className="text-4xl">⏳</div>
-              <p className="text-lg font-semibold text-gray-700">等待老師出題中…</p>
-              <p className="text-sm text-gray-400">已成功加入活動，請稍候</p>
-            </div>
-          ) : currentQuestion.type === 'poll' ? (
-            <PollQuestion
-              question={currentQuestion}
-              onAnswer={submitAnswer}
-              answered={answered}
-            />
-          ) : (
-            <OpenEndedQuestion
-              question={currentQuestion}
-              onAnswer={submitAnswer}
-              answered={answered}
-            />
-          )}
+      {/* overflow-y-auto 讓鍵盤彈起時內容可捲動 */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="min-h-full flex flex-col justify-center px-4 py-6">
+          <div className="bg-white rounded-2xl shadow-lg p-5 w-full max-w-sm mx-auto">
+            {!currentQuestion ? (
+              <div className="flex flex-col items-center gap-3 py-10">
+                <div className="text-5xl animate-pulse">⏳</div>
+                <p className="text-lg font-semibold text-gray-700">等待老師出題中…</p>
+                <p className="text-sm text-gray-400">已成功加入活動，請稍候</p>
+              </div>
+            ) : currentQuestion.type === 'poll' ? (
+              <PollQuestion
+                question={currentQuestion}
+                onAnswer={submitAnswer}
+                answered={answered}
+              />
+            ) : (
+              <OpenEndedQuestion
+                question={currentQuestion}
+                onAnswer={submitAnswer}
+                answered={answered}
+              />
+            )}
+          </div>
         </div>
       </div>
+
+      <div
+        className="shrink-0"
+        style={{ height: 'env(safe-area-inset-bottom)' }}
+      />
     </div>
   )
 }

@@ -15,20 +15,25 @@ export default function RoomCodeInput({ onSubmit, loading }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 items-center">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 items-center w-full">
       <input
         type="text"
+        inputMode="text"
+        autoCapitalize="characters"
+        autoCorrect="off"
+        autoComplete="off"
+        spellCheck={false}
         maxLength={6}
         value={code}
         onChange={e => setCode(e.target.value.toUpperCase())}
-        placeholder="輸入 6 碼房間碼"
-        className="w-48 text-center text-3xl font-mono tracking-widest border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 uppercase"
-        autoFocus
+        placeholder="XXXXXX"
+        className="w-44 text-center font-mono tracking-[0.4em] border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 uppercase"
+        style={{ fontSize: '1.75rem' }}
       />
       <button
         type="submit"
         disabled={code.trim().length !== 6 || loading}
-        className="px-8 py-3 bg-blue-600 text-white rounded-xl font-semibold text-lg disabled:opacity-40 hover:bg-blue-700 transition-colors"
+        className="w-full py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg disabled:opacity-40 active:scale-95 transition-transform"
       >
         {loading ? '加入中…' : '加入活動'}
       </button>

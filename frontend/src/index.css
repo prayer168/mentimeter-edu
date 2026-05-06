@@ -5,5 +5,12 @@
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900;
+    /* 防止 iOS 橡皮筋滾動穿透 */
+    overscroll-behavior: none;
+  }
+
+  /* 確保 input/textarea 在 iOS 不觸發縮放（字型需 >= 16px） */
+  input, textarea, select {
+    font-size: 16px;
   }
 }
