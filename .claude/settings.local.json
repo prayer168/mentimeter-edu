@@ -19,7 +19,10 @@
       "PowerShell(Get-Command *)",
       "Bash(git remote *)",
       "Bash(git push *)",
-      "Bash(pkill -f \"ts-node-dev\\\\|vite\")"
+      "Bash(pkill -f \"ts-node-dev\\\\|vite\")",
+      "Bash(sed -i \"s|from '@shared/types'|from '../shared'|g\" /c/Users/Roki/mentimeter-edu/backend/src/routes/activities.ts)",
+      "Bash(sed -i \"s|from '@shared/types'|from '../shared'|g\" /c/Users/Roki/mentimeter-edu/backend/src/routes/questions.ts)",
+      "Bash(sed -i \"s|from '@shared/types'|from '../../shared'|g\" /c/Users/Roki/mentimeter-edu/backend/src/socket/questionHandlers.ts)"
     ]
   }
 }

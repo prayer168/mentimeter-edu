@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io'
 import { supabase } from '../lib/supabase'
-import { Question, Answer } from '@shared/types'
+import type { Question, Answer } from '../shared'
 
 export function registerQuestionHandlers(io: Server, socket: Socket) {
   socket.on('teacher:push_question', async ({ questionId, activityId }: { questionId: string; activityId: string }) => {

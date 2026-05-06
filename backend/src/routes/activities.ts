@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express'
 import { supabase } from '../lib/supabase'
-import { Activity, Question, Answer } from '@shared/types'
+import type { Activity, Question, Answer } from '../shared'
 import { requireAuth } from '../middleware/auth'
 
 const router = Router()

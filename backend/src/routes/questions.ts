@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express'
 import { supabase } from '../lib/supabase'
-import { Question } from '@shared/types'
+import type { Question } from '../shared'
 
 const router = Router()
 
