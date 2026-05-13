@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Activity, Question, Answer } from '@shared/types'
 import { useSocket } from '../hooks/useSocket'
@@ -28,6 +28,8 @@ export default function TeacherPresent() {
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
   const [answers, setAnswers] = useState<Answer[]>([])
   const [loading, setLoading] = useState(true)
+  const [timeLeft, setTimeLeft] = useState<number | null>(null)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     if (!activityId) return
@@ -55,18 +57,51 @@ export default function TeacherPresent() {
     return () => { socket.off('room:answer_updated', onAnswerUpdated) }
   }, [connected, activityId, socket, currentQuestion?.id])
 
-  const pushQuestion = useCallback((question: Question) => {
-    setCurrentQuestion(question)
-    setAnswers([])
-    socket.emit('teacher:push_question', { questionId: question.id, activityId })
-  }, [socket, activityId])
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+    setTimeLeft(null)
+  }, [])
 
   const endQuestion = useCallback(() => {
     if (!currentQuestion) return
+    stopTimer()
     socket.emit('teacher:end_question', { questionId: currentQuestion.id, activityId })
     setCurrentQuestion(null)
     setAnswers([])
-  }, [socket, currentQuestion, activityId])
+  }, [socket, currentQuestion, activityId, stopTimer])
+
+  const pushQuestion = useCallback((question: Question) => {
+    stopTimer()
+    setCurrentQuestion(question)
+    setAnswers([])
+    socket.emit('teacher:push_question', { questionId: question.id, activityId })
+
+    if (question.timeLimit && question.timeLimit > 0) {
+      setTimeLeft(question.timeLimit)
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev === null || prev <= 1) {
+            clearInterval(timerRef.current!)
+            timerRef.current = null
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+  }, [socket, activityId, stopTimer])
+
+  // 計時結束時自動關閉題目
+  useEffect(() => {
+    if (timeLeft === 0) {
+      endQuestion()
+    }
+  }, [timeLeft, endQuestion])
+
+  useEffect(() => () => stopTimer(), [stopTimer])
 
   if (loading) {
     return (
@@ -128,6 +163,17 @@ export default function TeacherPresent() {
             </div>
           ) : (
             <div className="w-full max-w-3xl">
+              {/* 倒數計時器 */}
+              {timeLeft !== null && timeLeft > 0 && (
+                <div className="flex items-center justify-center mb-4 gap-3">
+                  <div className={`text-6xl font-mono font-bold tabular-nums transition-colors ${
+                    timeLeft <= 5 ? 'text-red-400 animate-pulse' : timeLeft <= 10 ? 'text-yellow-400' : 'text-green-400'
+                  }`}>
+                    {timeLeft}
+                  </div>
+                  <div className="text-gray-400 text-lg">秒</div>
+                </div>
+              )}
               <div className="bg-gray-800 rounded-2xl p-6 shadow-xl">
                 {currentQuestion.type === 'poll' ? (
                   <PollResult question={currentQuestion} answers={answers} />

@@ -7,6 +7,7 @@ export interface Question {
   title: string
   options?: string[]   // poll/ranking: 選項; scales: [minLabel, maxLabel]
   order: number
+  timeLimit?: number   // 倒數秒數，undefined 或 0 表示無限制
 }
 
 export interface Activity {

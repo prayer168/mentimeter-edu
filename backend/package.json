@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.2",
     "@mentimeter-edu/shared": "*",
     "@supabase/supabase-js": "^2.46.2",
     "cors": "^2.8.5",

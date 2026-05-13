@@ -31,6 +31,7 @@ interface LocalQuestion {
   type: QuestionType
   title: string
   options: string[]
+  timeLimit: number
 }
 
 export default function TeacherDashboard() {
@@ -52,7 +53,16 @@ export default function TeacherDashboard() {
   const [error, setError] = useState('')
 
   // 新增題目表單
-  const [newQ, setNewQ] = useState<LocalQuestion>({ type: 'poll', title: '', options: ['', ''] })
+  const [newQ, setNewQ] = useState<LocalQuestion>({ type: 'poll', title: '', options: ['', ''], timeLimit: 0 })
+
+  // AI 出題
+  const [aiTopic, setAiTopic] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiSuggestions, setAiSuggestions] = useState<Array<{ title: string; options: string[] }>>([])
+
+  // 編輯活動名稱
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingTitle, setEditingTitle] = useState('')
   const [addingQ, setAddingQ] = useState(false)
 
   function authHeaders() {
@@ -120,13 +130,62 @@ export default function TeacherDashboard() {
               ? [newQ.options[0]?.trim() || '非常不同意', newQ.options[1]?.trim() || '非常同意']
               : undefined,
           order: questions.length + 1,
+          timeLimit: newQ.timeLimit > 0 ? newQ.timeLimit : undefined,
         }),
       })
       if (!res.ok) throw new Error(await res.text())
       const q: Question = await res.json()
       setQuestions(prev => [...prev, q])
       setPastActivities(prev => prev.map(a => a.id === activity.id ? { ...a, questionCount: a.questionCount + 1 } : a))
-      setNewQ({ type: 'poll', title: '', options: ['', ''] })
+      setNewQ({ type: 'poll', title: '', options: ['', ''], timeLimit: 0 })
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '新增失敗')
+    } finally {
+      setAddingQ(false)
+    }
+  }
+
+  async function generateAiQuestions() {
+    if (!aiTopic.trim() || !activity) return
+    setAiLoading(true)
+    setAiSuggestions([])
+    setError('')
+    try {
+      const res = await fetch(`${BACKEND_URL}/ai/generate-questions`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ topic: aiTopic.trim(), count: 3 }),
+      })
+      if (!res.ok) throw new Error(await res.text())
+      const data = await res.json()
+      setAiSuggestions(data.questions ?? [])
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'AI 出題失敗')
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  async function addAiQuestion(q: { title: string; options: string[] }) {
+    if (!activity) return
+    setAddingQ(true)
+    try {
+      const res = await fetch(`${BACKEND_URL}/questions`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          activityId: activity.id,
+          type: 'poll',
+          title: q.title,
+          options: q.options,
+          order: questions.length + 1,
+        }),
+      })
+      if (!res.ok) throw new Error(await res.text())
+      const created: Question = await res.json()
+      setQuestions(prev => [...prev, created])
+      setPastActivities(prev => prev.map(a => a.id === activity.id ? { ...a, questionCount: a.questionCount + 1 } : a))
+      setAiSuggestions(prev => prev.filter(s => s.title !== q.title))
     } catch (e) {
       setError(e instanceof Error ? e.message : '新增失敗')
     } finally {
@@ -158,6 +217,33 @@ export default function TeacherDashboard() {
     setActivity(data.activity)
     setQuestions(data.questions)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  async function renameActivity(id: string) {
+    if (!editingTitle.trim()) return
+    try {
+      const res = await fetch(`${BACKEND_URL}/activities/${id}`, {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ title: editingTitle.trim() }),
+      })
+      if (!res.ok) throw new Error()
+      const updated: Activity = await res.json()
+      setPastActivities(prev => prev.map(a => a.id === id ? { ...a, title: updated.title } : a))
+      if (activity?.id === id) setActivity(prev => prev ? { ...prev, title: updated.title } : prev)
+    } finally {
+      setEditingId(null)
+    }
+  }
+
+  async function deleteActivity(id: string, title: string) {
+    if (!confirm(`確定要刪除「${title}」嗎？此操作無法復原。`)) return
+    await fetch(`${BACKEND_URL}/activities/${id}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    })
+    setPastActivities(prev => prev.filter(a => a.id !== id))
+    if (activity?.id === id) setActivity(null)
   }
 
   const joinUrl = activity ? `${window.location.origin}/join?code=${activity.roomCode}` : ''
@@ -209,6 +295,57 @@ export default function TeacherDashboard() {
               </div>
             </div>
 
+            {/* AI 出題 */}
+            <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🤖</span>
+                <h2 className="text-xl font-semibold text-gray-700">AI 自動出題</h2>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={aiTopic}
+                  onChange={e => setAiTopic(e.target.value)}
+                  placeholder="輸入單元名稱，例如：植物的生長"
+                  className="flex-1 border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-purple-500"
+                  onKeyDown={e => e.key === 'Enter' && generateAiQuestions()}
+                />
+                <button
+                  onClick={generateAiQuestions}
+                  disabled={!aiTopic.trim() || aiLoading}
+                  className="px-5 py-3 bg-purple-600 text-white rounded-xl font-semibold disabled:opacity-40 hover:bg-purple-700 transition-colors whitespace-nowrap"
+                >
+                  {aiLoading ? '生成中…' : '✨ 出題'}
+                </button>
+              </div>
+              {aiLoading && (
+                <div className="flex items-center gap-2 text-purple-600 text-sm">
+                  <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                  AI 正在思考題目，請稍候…
+                </div>
+              )}
+              {aiSuggestions.length > 0 && (
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm font-medium text-gray-600">✅ AI 建議的題目，點「加入」加到題目列表：</p>
+                  {aiSuggestions.map((q, i) => (
+                    <div key={i} className="bg-purple-50 border border-purple-200 rounded-xl p-4 flex items-start gap-3">
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-800">{q.title}</p>
+                        <p className="text-xs text-gray-500 mt-1">{q.options.join(' / ')}</p>
+                      </div>
+                      <button
+                        onClick={() => addAiQuestion(q)}
+                        disabled={addingQ}
+                        className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 disabled:opacity-40 transition-colors shrink-0"
+                      >
+                        加入
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* 新增題目 */}
             <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col gap-4">
               <h2 className="text-xl font-semibold text-gray-700">新增題目</h2>
@@ -216,7 +353,7 @@ export default function TeacherDashboard() {
                 {TYPE_CONFIG.map(({ type, label }) => (
                   <button
                     key={type}
-                    onClick={() => setNewQ(prev => ({ ...prev, type, options: type === 'scales' ? ['非常不同意', '非常同意'] : ['', ''] }))}
+                    onClick={() => setNewQ(prev => ({ ...prev, type, options: type === 'scales' ? ['非常不同意', '非常同意'] : ['', ''], timeLimit: prev.timeLimit }))}
                     className={`py-2 px-1 rounded-xl font-medium text-xs border-2 transition-colors ${
                       newQ.type === type
                         ? 'bg-indigo-600 text-white border-indigo-600'
@@ -277,6 +414,33 @@ export default function TeacherDashboard() {
                   </div>
                 </div>
               )}
+              {/* 計時器設定 */}
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium text-gray-600">⏱ 作答時限</p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { label: '無限制', value: 0 },
+                    { label: '10 秒', value: 10 },
+                    { label: '20 秒', value: 20 },
+                    { label: '30 秒', value: 30 },
+                    { label: '60 秒', value: 60 },
+                    { label: '90 秒', value: 90 },
+                  ].map(({ label, value }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setNewQ(prev => ({ ...prev, timeLimit: value }))}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium border-2 transition-colors ${
+                        newQ.timeLimit === value
+                          ? 'bg-amber-500 text-white border-amber-500'
+                          : 'border-gray-300 text-gray-600 hover:border-amber-400'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
               {error && <p className="text-red-500 text-sm">{error}</p>}
               <button
                 onClick={addQuestion}
@@ -302,6 +466,9 @@ export default function TeacherDashboard() {
                         <span className="text-gray-800">{q.title}</span>
                         {q.options && q.type !== 'scales' && (
                           <p className="text-xs text-gray-400 mt-1">{q.options.join(' / ')}</p>
+                        )}
+                        {q.timeLimit && q.timeLimit > 0 && (
+                          <span className="text-xs text-amber-600 font-medium">⏱ {q.timeLimit} 秒</span>
                         )}
                       </div>
                     </div>
@@ -359,30 +526,74 @@ export default function TeacherDashboard() {
               ) : (
                 <div className="flex flex-col gap-3">
                   {pastActivities.map(a => (
-                    <div key={a.id} className="flex items-center gap-3 p-4 border border-gray-200 rounded-xl hover:border-blue-300 transition-colors">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-800 truncate">{a.title}</p>
-                        <p className="text-sm text-gray-400 mt-0.5">
+                    <div key={a.id} className="flex flex-col gap-2 p-4 border border-gray-200 rounded-xl hover:border-blue-300 transition-colors">
+                      {editingId === a.id ? (
+                        <div className="flex gap-2">
+                          <input
+                            autoFocus
+                            type="text"
+                            value={editingTitle}
+                            onChange={e => setEditingTitle(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') renameActivity(a.id)
+                              if (e.key === 'Escape') setEditingId(null)
+                            }}
+                            className="flex-1 border-2 border-blue-400 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+                          />
+                          <button
+                            onClick={() => renameActivity(a.id)}
+                            className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                          >
+                            儲存
+                          </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="px-3 py-1.5 text-sm border border-gray-300 text-gray-500 rounded-lg hover:bg-gray-50"
+                          >
+                            取消
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <p className="flex-1 font-semibold text-gray-800 truncate">{a.title}</p>
+                          <button
+                            onClick={() => { setEditingId(a.id); setEditingTitle(a.title) }}
+                            className="text-xs px-2 py-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="編輯名稱"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => deleteActivity(a.id, a.title)}
+                            className="text-xs px-2 py-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="刪除活動"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-gray-400">
                           <span className="font-mono text-blue-600 font-bold tracking-wider">{a.roomCode}</span>
                           <span className="mx-2">·</span>
                           {a.questionCount} 題
                           <span className="mx-2">·</span>
                           {new Date(a.createdAt).toLocaleDateString('zh-TW')}
                         </p>
-                      </div>
-                      <div className="flex gap-2 shrink-0">
-                        <button
-                          onClick={() => navigate(`/teacher/results/${a.id}`)}
-                          className="px-3 py-2 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
-                        >
-                          查看結果
-                        </button>
-                        <button
-                          onClick={() => openExistingActivity(a.id)}
-                          className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          繼續使用
-                        </button>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={() => navigate(`/teacher/results/${a.id}`)}
+                            className="px-3 py-1.5 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            查看結果
+                          </button>
+                          <button
+                            onClick={() => openExistingActivity(a.id)}
+                            className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            繼續使用
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}

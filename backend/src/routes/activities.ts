@@ -43,6 +43,7 @@ function toQuestion(q: Record<string, unknown>): Question {
     title: q.title as string,
     options: (q.options as string[] | null) ?? undefined,
     order: q.order as number,
+    timeLimit: (q.time_limit as number | null) ?? undefined,
   }
 }
 
@@ -153,6 +154,49 @@ router.get('/:id/results', requireAuth, async (req: Request, res: Response) => {
     questions,
     answers,
   })
+})
+
+// 修改活動名稱
+router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
+  const { id } = req.params
+  const { title } = req.body as { title?: string }
+  if (!title?.trim()) {
+    res.status(400).send('title is required')
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('activities')
+    .update({ title: title.trim() })
+    .eq('id', id)
+    .eq('teacher_id', req.user!.id)
+    .select()
+    .single()
+
+  if (error || !data) {
+    res.status(404).send('Activity not found')
+    return
+  }
+
+  res.json(toActivity(data))
+})
+
+// 刪除活動
+router.delete('/:id', requireAuth, async (req: Request, res: Response) => {
+  const { id } = req.params
+
+  const { error } = await supabase
+    .from('activities')
+    .delete()
+    .eq('id', id)
+    .eq('teacher_id', req.user!.id)
+
+  if (error) {
+    res.status(500).send(error.message)
+    return
+  }
+
+  res.status(204).send()
 })
 
 export default router

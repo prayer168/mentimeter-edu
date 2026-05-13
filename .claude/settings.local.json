@@ -22,7 +22,9 @@
       "Bash(pkill -f \"ts-node-dev\\\\|vite\")",
       "Bash(sed -i \"s|from '@shared/types'|from '../shared'|g\" /c/Users/Roki/mentimeter-edu/backend/src/routes/activities.ts)",
       "Bash(sed -i \"s|from '@shared/types'|from '../shared'|g\" /c/Users/Roki/mentimeter-edu/backend/src/routes/questions.ts)",
-      "Bash(sed -i \"s|from '@shared/types'|from '../../shared'|g\" /c/Users/Roki/mentimeter-edu/backend/src/socket/questionHandlers.ts)"
+      "Bash(sed -i \"s|from '@shared/types'|from '../../shared'|g\" /c/Users/Roki/mentimeter-edu/backend/src/socket/questionHandlers.ts)",
+      "Read(//c/Users/Roki/.supabase/**)",
+      "Read(//c/Users/Roki/.config/supabase/**)"
     ]
   }
 }

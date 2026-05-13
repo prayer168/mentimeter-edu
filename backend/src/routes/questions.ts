@@ -5,12 +5,13 @@ import type { Question } from '../shared'
 const router = Router()
 
 router.post('/', async (req: Request, res: Response) => {
-  const { activityId, type, title, options, order } = req.body as {
+  const { activityId, type, title, options, order, timeLimit } = req.body as {
     activityId?: string
     type?: string
     title?: string
     options?: string[]
     order?: number
+    timeLimit?: number
   }
 
   if (!activityId || !type || !title?.trim()) {
@@ -32,6 +33,7 @@ router.post('/', async (req: Request, res: Response) => {
       title: title.trim(),
       options: type === 'poll' ? (options ?? []) : null,
       order: order ?? 1,
+      time_limit: timeLimit && timeLimit > 0 ? timeLimit : null,
     })
     .select()
     .single()
@@ -49,6 +51,7 @@ router.post('/', async (req: Request, res: Response) => {
     title: data.title,
     options: data.options ?? undefined,
     order: data.order,
+    timeLimit: data.time_limit ?? undefined,
   }
   res.json(question)
 })

@@ -24,6 +24,7 @@ export function registerQuestionHandlers(io: Server, socket: Socket) {
       title: q.title,
       options: q.options ?? undefined,
       order: q.order,
+      timeLimit: q.time_limit ?? undefined,
     }
 
     io.to(`activity:${activityId}`).emit('room:question_started', { question })

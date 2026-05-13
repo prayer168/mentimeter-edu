@@ -3,5 +3,7 @@ dist/
 .env
 .env.local
 *.env.local
+backend/.env
+frontend/.env.local
 supabase/.temp/
 apikey.txt

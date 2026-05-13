@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import { Server } from 'socket.io'
 import activitiesRouter from './routes/activities'
 import questionsRouter from './routes/questions'
+import aiRouter from './routes/ai'
 import { setupSocket } from './socket'
 
 dotenv.config()
@@ -21,6 +22,7 @@ app.use(express.json())
 
 app.use('/activities', activitiesRouter)
 app.use('/questions', questionsRouter)
+app.use('/ai', aiRouter)
 
 app.get('/health', (_req, res) => res.json({ ok: true }))
 
