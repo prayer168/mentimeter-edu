@@ -52,7 +52,8 @@ export default function TeacherLogin() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm flex flex-col gap-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-blue-800">Mentimeter EDU</h1>
+          <div className="text-4xl mb-1">🐻</div>
+          <h1 className="text-2xl font-bold text-indigo-800">熊學堂</h1>
           <p className="text-sm text-gray-500 mt-1">教師專用後台</p>
         </div>
 

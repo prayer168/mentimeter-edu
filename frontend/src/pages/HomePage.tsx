@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import BearLogo from '../components/BearLogo'
 
 const FEATURES = [
   { icon: '☁️', label: '文字雲', color: 'bg-pink-100 border-pink-300', text: 'text-pink-600' },
@@ -18,13 +19,12 @@ export default function HomePage() {
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
         <div className="flex items-center gap-3">
-          {/* Cute Logo */}
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center shadow-lg text-2xl rotate-3 hover:rotate-0 transition-transform">
-            🦉
+          <div className="rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 p-1 shadow-lg hover:scale-105 transition-transform">
+            <BearLogo size={44} />
           </div>
           <div>
-            <h1 className="text-xl font-extrabold text-indigo-800 leading-none">Mentimeter</h1>
-            <span className="text-xs font-bold text-purple-500 tracking-widest">EDU</span>
+            <h1 className="text-xl font-extrabold text-indigo-800 leading-none">熊學堂</h1>
+            <span className="text-xs font-bold text-purple-500 tracking-widest">互動課堂工具</span>
           </div>
         </div>
         <button
@@ -36,15 +36,19 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <main className="max-w-6xl mx-auto px-6 pt-12 pb-20 text-center">
-        <div className="text-7xl mb-6 animate-bounce">🎓</div>
+      <main className="max-w-6xl mx-auto px-6 pt-10 pb-20 text-center">
+        <div className="flex justify-center mb-6">
+          <div className="rounded-3xl bg-gradient-to-br from-indigo-400 to-purple-500 p-3 shadow-2xl hover:rotate-3 transition-transform">
+            <BearLogo size={100} />
+          </div>
+        </div>
 
         <h2 className="text-5xl font-extrabold text-gray-800 mb-4 leading-tight">
           讓課堂互動
           <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent"> 活起來！</span>
         </h2>
         <p className="text-xl text-gray-500 mb-10 max-w-xl mx-auto">
-          專為國小課堂設計的即時互動工具，老師出題，學生搶答，結果即時呈現。
+          台灣黑熊陪你上課 🐻 專為國小課堂設計的即時互動工具，老師出題，學生搶答，結果即時呈現。
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
@@ -101,8 +105,9 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-6 text-sm text-gray-400">
-        🦉 Mentimeter EDU — 為國小課堂打造的互動學習工具
+      <footer className="text-center py-6 text-sm text-gray-400 flex items-center justify-center gap-2">
+        <BearLogo size={20} />
+        熊學堂 — 台灣黑熊陪你上每一堂課
       </footer>
     </div>
   )

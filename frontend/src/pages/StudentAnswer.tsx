@@ -140,7 +140,7 @@ export default function StudentAnswer() {
         className="px-4 py-3 bg-blue-700 text-white flex items-center justify-between shrink-0"
         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
       >
-        <span className="font-bold text-sm">Mentimeter EDU</span>
+        <span className="font-bold text-sm">🐻 熊學堂</span>
         <span className="text-xs font-mono tracking-widest text-blue-200 bg-blue-800 px-2 py-1 rounded-lg">
           {roomCode}
         </span>
