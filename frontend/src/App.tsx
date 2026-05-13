@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import HomePage from './pages/HomePage'
 import TeacherLogin from './pages/TeacherLogin'
 import TeacherDashboard from './pages/TeacherDashboard'
 import TeacherPresent from './pages/TeacherPresent'
@@ -13,7 +14,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/teacher" replace />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<TeacherLogin />} />
           <Route
             path="/teacher"
