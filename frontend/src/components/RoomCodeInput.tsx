@@ -33,7 +33,7 @@ export default function RoomCodeInput({ onSubmit, loading }: Props) {
       <button
         type="submit"
         disabled={code.trim().length !== 6 || loading}
-        className="w-full py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg disabled:opacity-40 active:scale-95 transition-transform"
+        className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold text-lg disabled:bg-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed active:scale-95 transition-all"
       >
         {loading ? '加入中…' : '加入活動'}
       </button>

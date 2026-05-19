@@ -22,7 +22,7 @@ export default function StudentJoin() {
       {/* 頂部品牌列 */}
       <header className="px-4 pt-[env(safe-area-inset-top)] pb-0">
         <div className="py-3 text-center">
-          <span className="text-sm font-semibold text-blue-700 tracking-wide">Mentimeter EDU</span>
+          <span className="text-sm font-semibold text-purple-700 tracking-wide">🐻 熊學堂</span>
         </div>
       </header>
 
