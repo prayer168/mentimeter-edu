@@ -52,18 +52,24 @@ export default function HomePage() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
-          <button
-            onClick={() => navigate('/teacher')}
-            className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
-          >
-            🚀 開始教學
-          </button>
-          <button
-            onClick={() => navigate('/join')}
-            className="px-8 py-4 bg-white text-indigo-600 text-lg font-bold rounded-2xl border-2 border-indigo-200 shadow hover:shadow-md hover:scale-105 transition-all"
-          >
-            📱 加入課堂
-          </button>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">教師</span>
+            <button
+              onClick={() => navigate('/teacher')}
+              className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+            >
+              🚀 開始教學
+            </button>
+          </div>
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest">學生</span>
+            <button
+              onClick={() => navigate('/join')}
+              className="px-8 py-4 bg-gradient-to-r from-emerald-400 to-green-500 text-white text-lg font-bold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+            >
+              📱 加入課堂
+            </button>
+          </div>
         </div>
 
         {/* Features */}
