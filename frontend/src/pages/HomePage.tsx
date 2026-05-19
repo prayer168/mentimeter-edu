@@ -3,7 +3,7 @@ import BearLogo from '../components/BearLogo'
 
 const FEATURES = [
   { icon: '☁️', label: '文字雲', color: 'bg-pink-100 border-pink-300', text: 'text-pink-600' },
-  { icon: '📊', label: 'Poll 投票', color: 'bg-blue-100 border-blue-300', text: 'text-blue-600' },
+  { icon: '📊', label: '單選投票', color: 'bg-blue-100 border-blue-300', text: 'text-blue-600' },
   { icon: '💬', label: '開放作答', color: 'bg-purple-100 border-purple-300', text: 'text-purple-600' },
   { icon: '🎚️', label: '量尺評分', color: 'bg-orange-100 border-orange-300', text: 'text-orange-600' },
   { icon: '🏆', label: '排序競賽', color: 'bg-green-100 border-green-300', text: 'text-green-600' },

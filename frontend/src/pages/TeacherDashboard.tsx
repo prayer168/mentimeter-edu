@@ -16,7 +16,7 @@ const BADGE_CLASS: Record<string, string> = {
 }
 
 const TYPE_CONFIG: { type: QuestionType; label: string; color: string }[] = [
-  { type: 'poll',       label: 'Poll 投票',  color: 'blue'   },
+  { type: 'poll',       label: '單選投票',   color: 'blue'   },
   { type: 'open_ended', label: '開放作答',    color: 'purple' },
   { type: 'word_cloud', label: '文字雲',      color: 'pink'   },
   { type: 'scales',     label: '量尺評分',    color: 'orange' },
