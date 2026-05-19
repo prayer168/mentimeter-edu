@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import BearLogo from '../components/BearLogo'
 
 type Tab = 'login' | 'register'
 
@@ -49,10 +50,14 @@ export default function TeacherLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm flex flex-col gap-6">
         <div className="text-center">
-          <div className="text-4xl mb-1">🐻</div>
+          <div className="flex justify-center mb-2">
+            <div className="rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 p-2 shadow-md">
+              <BearLogo size={56} />
+            </div>
+          </div>
           <h1 className="text-2xl font-bold text-indigo-800">熊學堂</h1>
           <p className="text-sm text-gray-500 mt-1">教師專用後台</p>
         </div>
@@ -64,7 +69,7 @@ export default function TeacherLogin() {
               onClick={() => switchTab(t)}
               className={`flex-1 pb-2.5 text-sm font-medium transition-colors ${
                 tab === t
-                  ? 'border-b-2 border-blue-600 text-blue-600'
+                  ? 'border-b-2 border-indigo-600 text-indigo-600'
                   : 'text-gray-400 hover:text-gray-600'
               }`}
             >
@@ -83,7 +88,7 @@ export default function TeacherLogin() {
               required
               autoFocus
               placeholder="teacher@school.edu.tw"
-              className="border-2 border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+              className="border-2 border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500"
             />
           </div>
 
@@ -96,7 +101,7 @@ export default function TeacherLogin() {
               required
               minLength={6}
               placeholder="至少 6 個字元"
-              className="border-2 border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+              className="border-2 border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500"
             />
           </div>
 
@@ -110,7 +115,7 @@ export default function TeacherLogin() {
           <button
             type="submit"
             disabled={loading}
-            className="py-3 bg-blue-600 text-white rounded-xl font-semibold disabled:opacity-40 hover:bg-blue-700 transition-colors"
+            className="py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-semibold disabled:opacity-40 hover:shadow-md transition-all"
           >
             {loading ? '處理中…' : tab === 'login' ? '登入' : '建立帳號'}
           </button>
