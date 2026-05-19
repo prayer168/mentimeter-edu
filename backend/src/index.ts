@@ -6,6 +6,7 @@ import { Server } from 'socket.io'
 import activitiesRouter from './routes/activities'
 import questionsRouter from './routes/questions'
 import { setupSocket } from './socket'
+import { supabase } from './lib/supabase'
 
 dotenv.config()
 
@@ -33,3 +34,14 @@ setupSocket(io)
 server.listen(PORT, () => {
   console.log(`Backend listening on http://localhost:${PORT}`)
 })
+
+// 每 5 天 ping 一次 Supabase，防止免費方案因閒置被自動暫停（閒置上限為 7 天）
+const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000
+setInterval(async () => {
+  try {
+    await supabase.from('activities').select('id').limit(1)
+    console.log('[keep-alive] Supabase ping OK', new Date().toISOString())
+  } catch (err) {
+    console.error('[keep-alive] Supabase ping failed', err)
+  }
+}, FIVE_DAYS_MS)
