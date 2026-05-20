@@ -61,6 +61,7 @@ export default function TeacherDashboard() {
   const [activityTitle, setActivityTitle] = useState('')
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
+  const [starterType, setStarterType] = useState<QuestionType>('poll')
 
   // 新增題目表單
   const [newQ, setNewQ] = useState<LocalQuestion>({ type: 'poll', title: '', options: ['', ''], timeLimit: 0 })
@@ -112,6 +113,7 @@ export default function TeacherDashboard() {
       setActivity(data)
       setQuestions([])
       setShowNewForm(false)
+      setNewQ(prev => ({ ...prev, type: starterType, options: starterType === 'scales' ? ['非常不同意', '非常同意'] : ['', ''] }))
       setPastActivities(prev => [{ ...data, questionCount: 0 }, ...prev])
     } catch (e) {
       setError(e instanceof Error ? e.message : '建立失敗')
@@ -543,33 +545,64 @@ export default function TeacherDashboard() {
             {!showNewForm ? (
               <button
                 onClick={() => setShowNewForm(true)}
-                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-semibold text-lg hover:bg-blue-700 transition-colors shadow-md"
+                className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-bold text-base sm:text-lg hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] transition-all shadow-md"
               >
                 ＋ 建立新活動
               </button>
             ) : (
-              <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-gray-700">建立新活動</h2>
-                  <button onClick={() => setShowNewForm(false)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+              <div className="bg-white rounded-2xl shadow-lg border border-indigo-100 overflow-hidden">
+                {/* 標題 */}
+                <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+                  <h2 className="font-bold text-base">🎯 建立新活動</h2>
+                  <button onClick={() => setShowNewForm(false)} className="text-white/70 hover:text-white text-xl leading-none">×</button>
                 </div>
-                <input
-                  type="text"
-                  value={activityTitle}
-                  onChange={e => setActivityTitle(e.target.value)}
-                  placeholder="輸入活動名稱，例如：第三章複習"
-                  autoFocus
-                  className="border-2 border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500"
-                  onKeyDown={e => e.key === 'Enter' && createActivity()}
-                />
-                {error && <p className="text-red-500 text-sm">{error}</p>}
-                <button
-                  onClick={createActivity}
-                  disabled={!activityTitle.trim() || creating}
-                  className="py-3 bg-blue-600 text-white rounded-xl font-semibold disabled:opacity-40 hover:bg-blue-700 transition-colors"
-                >
-                  {creating ? '建立中…' : '建立活動'}
-                </button>
+
+                <div className="p-5 flex flex-col gap-5">
+                  {/* 活動名稱 */}
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">活動名稱</label>
+                    <input
+                      type="text"
+                      value={activityTitle}
+                      onChange={e => setActivityTitle(e.target.value)}
+                      placeholder="例如：第三章 植物的生長 複習"
+                      autoFocus
+                      className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-400 text-sm transition-colors"
+                      onKeyDown={e => e.key === 'Enter' && activityTitle.trim() && createActivity()}
+                    />
+                  </div>
+
+                  {/* 選擇第一道題型 */}
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 block">選擇第一道題型</label>
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                      {TOOLBAR_TYPES.map(({ type, icon, label, active }) => (
+                        <button
+                          key={type}
+                          onClick={() => setStarterType(type)}
+                          className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all text-xs font-semibold ${
+                            starterType === type
+                              ? `${active} text-white border-transparent shadow-md scale-105`
+                              : 'border-gray-200 text-gray-600 hover:border-indigo-300 hover:bg-indigo-50'
+                          }`}
+                        >
+                          <span className="text-2xl">{icon}</span>
+                          <span className="leading-tight text-center">{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {error && <p className="text-red-500 text-sm bg-red-50 rounded-lg px-3 py-2">{error}</p>}
+
+                  <button
+                    onClick={createActivity}
+                    disabled={!activityTitle.trim() || creating}
+                    className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-bold disabled:opacity-40 hover:shadow-md transition-all"
+                  >
+                    {creating ? '建立中…' : `🚀 建立活動並開始出${TOOLBAR_TYPES.find(t => t.type === starterType)?.label ?? ''}題`}
+                  </button>
+                </div>
               </div>
             )}
 
