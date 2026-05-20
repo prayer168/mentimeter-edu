@@ -65,6 +65,9 @@ export default function TeacherDashboard() {
   const [editingTitle, setEditingTitle] = useState('')
   const [addingQ, setAddingQ] = useState(false)
 
+  // 課堂工具面板
+  const [showTools, setShowTools] = useState(false)
+
   function authHeaders() {
     return {
       'Content-Type': 'application/json',
@@ -249,12 +252,12 @@ export default function TeacherDashboard() {
   const joinUrl = activity ? `${window.location.origin}/join?code=${activity.roomCode}` : ''
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4">
       <div className="max-w-2xl mx-auto">
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-blue-800">教師後台</h1>
+          <h1 className="text-3xl font-bold text-indigo-800">教師後台</h1>
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-500 hidden sm:block">{user?.email}</span>
             <button
@@ -603,6 +606,43 @@ export default function TeacherDashboard() {
           </div>
         )}
       </div>
+
+      {/* 課堂工具浮動按鈕 */}
+      <button
+        onClick={() => setShowTools(true)}
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
+        title="開啟課堂工具"
+      >
+        🛠️ 課堂工具
+      </button>
+
+      {/* 課堂工具 Modal */}
+      {showTools && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-black/60 backdrop-blur-sm">
+          {/* 標題列 */}
+          <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🛠️</span>
+              <span className="font-bold text-lg">課堂工具</span>
+              <span className="text-indigo-200 text-sm hidden sm:block">— 碼錶・時鐘・輪盤抽籤・倒數計時・白板</span>
+            </div>
+            <button
+              onClick={() => setShowTools(false)}
+              className="text-white/80 hover:text-white text-2xl font-bold leading-none px-2"
+              title="關閉"
+            >
+              ×
+            </button>
+          </div>
+          {/* iframe */}
+          <iframe
+            src="https://prayer168.github.io/classroom_tools/"
+            className="flex-1 w-full border-0 bg-white"
+            title="教室互動儀表板"
+            allow="fullscreen"
+          />
+        </div>
+      )}
     </div>
   )
 }
