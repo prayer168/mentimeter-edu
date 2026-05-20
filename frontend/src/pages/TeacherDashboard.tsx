@@ -600,7 +600,7 @@ export default function TeacherDashboard() {
                     disabled={!activityTitle.trim() || creating}
                     className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-bold disabled:opacity-40 hover:shadow-md transition-all"
                   >
-                    {creating ? '建立中…' : `🚀 建立活動並開始出${TOOLBAR_TYPES.find(t => t.type === starterType)?.label ?? ''}題`}
+                    {creating ? '建立中…' : '🚀 建立活動'}
                   </button>
                 </div>
               </div>
