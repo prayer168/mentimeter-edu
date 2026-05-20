@@ -80,8 +80,8 @@ export default function TeacherLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm flex flex-col gap-6">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex flex-col items-center justify-center p-4 sm:p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 w-full max-w-sm flex flex-col gap-5">
 
         {/* Logo */}
         <div className="text-center">

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Activity, Question, QuestionType } from '@shared/types'
 import { useAuth } from '../contexts/AuthContext'
 import QRCodeDisplay from '../components/QRCodeDisplay'
+import ClassroomToolsButton from '../components/ClassroomToolsButton'
+import ClassroomToolsModal from '../components/ClassroomToolsModal'
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001'
 const MAX_OPTIONS = 6
@@ -14,6 +16,14 @@ const BADGE_CLASS: Record<string, string> = {
   scales: 'bg-orange-100 text-orange-700',
   ranking: 'bg-teal-100 text-teal-700',
 }
+
+const TOOLBAR_TYPES: { type: QuestionType; icon: string; label: string; active: string; ring: string }[] = [
+  { type: 'poll',       icon: '📊', label: '單選投票', active: 'bg-blue-500',   ring: 'ring-blue-300'   },
+  { type: 'open_ended', icon: '💬', label: '開放作答', active: 'bg-purple-500', ring: 'ring-purple-300' },
+  { type: 'word_cloud', icon: '☁️', label: '文字雲',   active: 'bg-pink-500',   ring: 'ring-pink-300'   },
+  { type: 'scales',     icon: '🎚️', label: '量尺評分', active: 'bg-orange-500', ring: 'ring-orange-300' },
+  { type: 'ranking',    icon: '🏆', label: '排序競賽', active: 'bg-teal-500',   ring: 'ring-teal-300'   },
+]
 
 const TYPE_CONFIG: { type: QuestionType; label: string; color: string }[] = [
   { type: 'poll',       label: '單選投票',   color: 'blue'   },
@@ -252,54 +262,122 @@ export default function TeacherDashboard() {
   const joinUrl = activity ? `${window.location.origin}/join?code=${activity.roomCode}` : ''
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-indigo-800">教師後台</h1>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500 hidden sm:block">{user?.email}</span>
+      {/* Top Navigation Bar */}
+      <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
+        <div className="max-w-5xl mx-auto px-3 sm:px-4 h-12 sm:h-14 flex items-center justify-between gap-2">
+          {/* Left: Logo + breadcrumb */}
+          <div className="flex items-center gap-2 min-w-0">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 transition-colors font-semibold text-sm shrink-0"
+            >
+              🐻 <span className="hidden sm:inline">熊學堂</span>
+            </button>
+            <span className="text-gray-300">/</span>
+            <span className="text-gray-700 font-semibold text-sm truncate max-w-[120px] sm:max-w-xs">
+              {activity ? activity.title : '教師後台'}
+            </span>
+          </div>
+          {/* Right: actions */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <ClassroomToolsButton onClick={() => setShowTools(true)} size="sm" />
+            <span className="text-xs text-gray-400 hidden lg:block max-w-[100px] truncate">{user?.email}</span>
             <button
               onClick={() => signOut()}
-              className="text-sm px-4 py-2 border border-gray-300 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
+              className="text-xs px-2.5 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
             >
               登出
             </button>
           </div>
         </div>
 
+        {/* Question Type Toolbar — only show when editing an activity */}
+        {activity && (
+          <div className="border-t border-gray-100 bg-gray-50">
+            <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2 flex items-center gap-1 overflow-x-auto scrollbar-hide">
+              <span className="text-xs font-semibold text-gray-400 mr-1 shrink-0">出題：</span>
+              {TOOLBAR_TYPES.map(({ type, icon, label, active, ring }) => (
+                <button
+                  key={type}
+                  onClick={() => {
+                    setNewQ(prev => ({ ...prev, type, options: type === 'scales' ? ['非常不同意', '非常同意'] : ['', ''], timeLimit: prev.timeLimit }))
+                    document.getElementById('add-question-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
+                    newQ.type === type
+                      ? `${active} text-white shadow-sm ring-2 ${ring}`
+                      : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                  }`}
+                >
+                  <span>{icon}</span>
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </nav>
+
+      <div className="max-w-5xl mx-auto px-4 py-6">
+
         {/* 當前活動編輯區 */}
         {activity && (
-          <div className="flex flex-col gap-6 mb-8">
-            <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col sm:flex-row items-center gap-6">
-              <QRCodeDisplay url={joinUrl} roomCode={activity.roomCode} />
-              <div className="flex-1 w-full">
-                <h2 className="text-xl font-bold text-gray-800 mb-1">{activity.title}</h2>
-                <p className="text-sm text-gray-500 mb-4">學生掃描 QR Code 或輸入房間碼加入</p>
-                <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+            {/* 左欄：QR Code + 控制 */}
+            <div className="lg:col-span-1 flex flex-col gap-4">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col items-center gap-4">
+                <QRCodeDisplay url={joinUrl} roomCode={activity.roomCode} />
+                <div className="w-full flex flex-col gap-2">
                   <button
                     onClick={() => navigate(`/teacher/present/${activity.id}`)}
                     disabled={questions.length === 0}
-                    className="w-full py-3 bg-green-600 text-white rounded-xl font-semibold disabled:opacity-40 hover:bg-green-700 transition-colors"
+                    className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold text-sm disabled:opacity-40 hover:shadow-md transition-all"
                   >
-                    開始投影畫面 →
+                    🚀 開始投影畫面
                   </button>
                   <button
                     onClick={() => setActivity(null)}
-                    className="w-full py-2 text-sm text-gray-500 hover:text-gray-700"
+                    className="w-full py-2 text-xs text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    ← 回到活動列表
+                    ← 返回活動列表
                   </button>
                 </div>
                 {questions.length === 0 && (
-                  <p className="text-xs text-gray-400 mt-1 text-center">請先新增至少一個題目</p>
+                  <p className="text-xs text-amber-500 bg-amber-50 rounded-lg px-3 py-2 text-center w-full">請先新增至少一道題目</p>
                 )}
               </div>
+
+              {/* 題目列表 */}
+              {questions.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+                  <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">題目列表 ({questions.length})</h3>
+                  <div className="flex flex-col gap-2">
+                    {questions.map((q, i) => (
+                      <div key={q.id} className="flex items-start gap-2 p-2 bg-gray-50 rounded-xl">
+                        <span className="text-xs font-bold text-gray-400 w-5 shrink-0 mt-0.5">{i + 1}</span>
+                        <div className="flex-1 min-w-0">
+                          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-md mr-1 ${BADGE_CLASS[q.type] ?? 'bg-gray-100 text-gray-700'}`}>
+                            {TYPE_CONFIG.find(t => t.type === q.type)?.label ?? q.type}
+                          </span>
+                          <span className="text-xs text-gray-700 leading-snug">{q.title}</span>
+                          {q.timeLimit && q.timeLimit > 0 && (
+                            <span className="block text-xs text-amber-500 mt-0.5">⏱ {q.timeLimit}秒</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
+            {/* 右欄：出題表單 */}
+            <div className="lg:col-span-2 flex flex-col gap-4">
+
             {/* AI 出題 */}
-            <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col gap-4">
+            <div id="add-question-form" className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-xl">🤖</span>
                 <h2 className="text-xl font-semibold text-gray-700">AI 自動出題</h2>
@@ -350,8 +428,8 @@ export default function TeacherDashboard() {
             </div>
 
             {/* 新增題目 */}
-            <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col gap-4">
-              <h2 className="text-xl font-semibold text-gray-700">新增題目</h2>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 flex flex-col gap-4">
+              <h2 className="text-base font-bold text-gray-700">新增題目</h2>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                 {TYPE_CONFIG.map(({ type, label }) => (
                   <button
@@ -454,32 +532,8 @@ export default function TeacherDashboard() {
               </button>
             </div>
 
-            {/* 題目列表 */}
-            {questions.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-md p-6">
-                <h2 className="text-xl font-semibold text-gray-700 mb-3">題目列表</h2>
-                <div className="flex flex-col gap-2">
-                  {questions.map((q, i) => (
-                    <div key={q.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="font-bold text-gray-400 w-6 shrink-0">{i + 1}</span>
-                      <div className="flex-1">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full mr-2 ${BADGE_CLASS[q.type] ?? 'bg-gray-100 text-gray-700'}`}>
-                          {TYPE_CONFIG.find(t => t.type === q.type)?.label ?? q.type}
-                        </span>
-                        <span className="text-gray-800">{q.title}</span>
-                        {q.options && q.type !== 'scales' && (
-                          <p className="text-xs text-gray-400 mt-1">{q.options.join(' / ')}</p>
-                        )}
-                        {q.timeLimit && q.timeLimit > 0 && (
-                          <span className="text-xs text-amber-600 font-medium">⏱ {q.timeLimit} 秒</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+            </div>{/* 右欄結束 */}
+          </div>{/* grid 結束 */}
         )}
 
         {/* 活動歷史 / 建立新活動 */}
@@ -520,8 +574,8 @@ export default function TeacherDashboard() {
             )}
 
             {/* 過去活動列表 */}
-            <div className="bg-white rounded-2xl shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-700 mb-4">我的活動</h2>
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-lg font-bold text-gray-700 mb-4">我的活動</h2>
               {loadingHistory ? (
                 <p className="text-gray-400 text-center py-6">載入中…</p>
               ) : pastActivities.length === 0 ? (
@@ -607,42 +661,8 @@ export default function TeacherDashboard() {
         )}
       </div>
 
-      {/* 課堂工具浮動按鈕 */}
-      <button
-        onClick={() => setShowTools(true)}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
-        title="開啟課堂工具"
-      >
-        🛠️ 課堂工具
-      </button>
-
       {/* 課堂工具 Modal */}
-      {showTools && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-black/60 backdrop-blur-sm">
-          {/* 標題列 */}
-          <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🛠️</span>
-              <span className="font-bold text-lg">課堂工具</span>
-              <span className="text-indigo-200 text-sm hidden sm:block">— 碼錶・時鐘・輪盤抽籤・倒數計時・白板</span>
-            </div>
-            <button
-              onClick={() => setShowTools(false)}
-              className="text-white/80 hover:text-white text-2xl font-bold leading-none px-2"
-              title="關閉"
-            >
-              ×
-            </button>
-          </div>
-          {/* iframe */}
-          <iframe
-            src="https://prayer168.github.io/classroom_tools/"
-            className="flex-1 w-full border-0 bg-white"
-            title="教室互動儀表板"
-            allow="fullscreen"
-          />
-        </div>
-      )}
+      {showTools && <ClassroomToolsModal onClose={() => setShowTools(false)} />}
     </div>
   )
 }
