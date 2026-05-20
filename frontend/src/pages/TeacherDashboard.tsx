@@ -15,13 +15,21 @@ const BADGE_CLASS: Record<string, string> = {
   ranking: 'bg-teal-100 text-teal-700',
 }
 
-const TYPE_CONFIG: { type: QuestionType; label: string; color: string }[] = [
-  { type: 'poll',       label: '單選投票',   color: 'blue'   },
-  { type: 'open_ended', label: '開放作答',    color: 'purple' },
-  { type: 'word_cloud', label: '文字雲',      color: 'pink'   },
-  { type: 'scales',     label: '量尺評分',    color: 'orange' },
-  { type: 'ranking',    label: '排序',        color: 'teal'   },
+const TYPE_CONFIG: { type: QuestionType; label: string; color: string; icon: string; desc: string }[] = [
+  { type: 'poll',       label: '單選投票', color: 'blue',   icon: '📊', desc: '多選一，即時長條圖結果' },
+  { type: 'open_ended', label: '開放作答', color: 'purple', icon: '💬', desc: '自由輸入，滾動顯示回應' },
+  { type: 'word_cloud', label: '文字雲',   color: 'pink',   icon: '☁️', desc: '關鍵詞，字體大小代表頻率' },
+  { type: 'scales',     label: '量尺評分', color: 'orange', icon: '📏', desc: '1–10 分滑桿評分量尺' },
+  { type: 'ranking',    label: '排序競賽', color: 'teal',   icon: '🏆', desc: '拖曳排序，統計各項名次' },
 ]
+
+const TYPE_DROPDOWN_STYLE: Record<string, { border: string; hover: string }> = {
+  poll:       { border: 'border-blue-200',   hover: 'hover:border-blue-400 hover:bg-blue-50'   },
+  open_ended: { border: 'border-purple-200', hover: 'hover:border-purple-400 hover:bg-purple-50' },
+  word_cloud: { border: 'border-pink-200',   hover: 'hover:border-pink-400 hover:bg-pink-50'   },
+  scales:     { border: 'border-orange-200', hover: 'hover:border-orange-400 hover:bg-orange-50' },
+  ranking:    { border: 'border-teal-200',   hover: 'hover:border-teal-400 hover:bg-teal-50'   },
+}
 
 interface ActivityWithCount extends Activity {
   questionCount: number
@@ -67,6 +75,9 @@ export default function TeacherDashboard() {
 
   // 課堂工具面板
   const [showTools, setShowTools] = useState(false)
+
+  // 建立新活動下拉選單
+  const [showCreateDropdown, setShowCreateDropdown] = useState(false)
 
   function authHeaders() {
     return {
@@ -258,7 +269,14 @@ export default function TeacherDashboard() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-indigo-800">教師後台</h1>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowTools(true)}
+              className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl text-sm shadow-md hover:opacity-90 hover:scale-105 transition-all"
+              title="開啟課堂工具"
+            >
+              🛠️ <span className="hidden sm:inline">課堂工具</span>
+            </button>
             <span className="text-sm text-gray-500 hidden sm:block">{user?.email}</span>
             <button
               onClick={() => signOut()}
@@ -487,12 +505,55 @@ export default function TeacherDashboard() {
           <div className="flex flex-col gap-4">
             {/* 建立新活動 */}
             {!showNewForm ? (
-              <button
-                onClick={() => setShowNewForm(true)}
-                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-semibold text-lg hover:bg-blue-700 transition-colors shadow-md"
-              >
-                ＋ 建立新活動
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowCreateDropdown(v => !v)}
+                  className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-2xl font-semibold text-lg hover:opacity-90 transition-all shadow-md flex items-center justify-center gap-2"
+                >
+                  ＋ 建立新活動
+                  <span className={`text-base transition-transform duration-200 ${showCreateDropdown ? 'rotate-180' : ''}`}>▾</span>
+                </button>
+                {showCreateDropdown && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowCreateDropdown(false)} />
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-indigo-100 p-4 z-20">
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">選擇起始題型</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {TYPE_CONFIG.map(({ type, label, icon, desc }) => (
+                          <button
+                            key={type}
+                            onClick={() => {
+                              setShowCreateDropdown(false)
+                              setNewQ(prev => ({
+                                ...prev,
+                                type,
+                                options: type === 'scales' ? ['非常不同意', '非常同意'] : ['', ''],
+                              }))
+                              setShowNewForm(true)
+                            }}
+                            className={`flex flex-col items-start p-3 rounded-xl border-2 transition-colors text-left ${TYPE_DROPDOWN_STYLE[type].border} ${TYPE_DROPDOWN_STYLE[type].hover}`}
+                          >
+                            <span className="text-2xl mb-1">{icon}</span>
+                            <span className="font-semibold text-gray-800 text-sm">{label}</span>
+                            <span className="text-xs text-gray-400 mt-0.5 leading-snug">{desc}</span>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <button
+                          onClick={() => {
+                            setShowCreateDropdown(false)
+                            setShowNewForm(true)
+                          }}
+                          className="w-full py-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+                        >
+                          → 直接輸入活動名稱
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             ) : (
               <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col gap-4">
                 <div className="flex items-center justify-between">
@@ -606,15 +667,6 @@ export default function TeacherDashboard() {
           </div>
         )}
       </div>
-
-      {/* 課堂工具浮動按鈕 */}
-      <button
-        onClick={() => setShowTools(true)}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
-        title="開啟課堂工具"
-      >
-        🛠️ 課堂工具
-      </button>
 
       {/* 課堂工具 Modal */}
       {showTools && (
