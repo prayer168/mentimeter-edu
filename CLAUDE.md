@@ -1,4 +1,4 @@
-# 仿 Mentimeter 教學互動 APP
+# 熊學堂 — 互動課堂工具
 
 > 本文件供 Claude Code 在每個開發 session 啟動時讀取，確保所有任務的技術方向、命名規則與架構一致。
 
@@ -6,14 +6,16 @@
 
 ## 專案概述
 
-供國小自然科教師使用的即時互動教學工具，功能仿照 Mentimeter。
+**網站名稱：** 熊學堂互動課堂工具
+**線上網址：** https://mentimeter-edu.vercel.app/
+**專案路徑（本機）：** `G:\google drive\Dropbox (十年磨一劍)\0000000000數位教材\APP\Mentimeter_Prayer\mentimeter-edu`
+
+供國小教師使用的即時互動教學工具，功能仿照 Mentimeter。台灣黑熊吉祥物（SVG，`BearLogo` 元件），品牌色：indigo/purple 漸層。
 
 **使用情境：**
 - 教師建立「活動房間」並投影教師端畫面
-- 學生用手機掃描 QR Code 或輸入房間碼加入
+- 學生用手機掃描 QR Code 或輸入 6 碼房間碼加入
 - 教師逐題推送題目，學生即時作答，結果同步顯示在投影畫面
-
-**專案路徑：** `C:\Users\Roki\mentimeter-edu`
 
 ---
 
@@ -26,18 +28,22 @@
 - **路由**：React Router v6
 - **圖表**：Recharts
 - **即時通訊**：Socket.io-client
+- **部署**：Vercel（`main` 分支自動部署）
 
 ### 後端
 - **執行環境**：Node.js v24
 - **框架**：Express.js
 - **即時通訊**：Socket.io
-- **資料庫**：Supabase（PostgreSQL）
+- **資料庫**：Supabase（PostgreSQL，專案 ID：`cmeiwebdaavcurzivegm`）
 - **客戶端**：@supabase/supabase-js v2
 - **驗證**：Supabase Auth（Email/Password）
+- **部署**：Railway（專案名稱：`zucchini-amazement`，`master` 分支）
 
-### 開發工具
-- **套件管理**：npm workspaces
-- **後端執行**：ts-node-dev
+### Git 分支說明
+| 分支 | 用途 |
+|------|------|
+| `main` | 前端（Vercel 自動部署） |
+| `master` | 後端（Railway 自動部署） |
 
 ---
 
@@ -46,6 +52,7 @@
 ```
 mentimeter-edu/
 ├── CLAUDE.md
+├── 仿Mentimeter教學APP開發踩坑紀錄_2.md
 ├── package.json                    ← npm workspace 根目錄
 ├── packages/shared/
 │   └── types.ts                    ← 前後端共用型別
@@ -59,38 +66,35 @@ mentimeter-edu/
 │       ├── main.tsx
 │       ├── index.css
 │       ├── contexts/
-│       │   └── AuthContext.tsx     ← Supabase Auth 狀態管理
+│       │   └── AuthContext.tsx     ← Supabase Auth（含 resetPassword）
 │       ├── components/
+│       │   ├── BearLogo.tsx        ← 台灣黑熊 SVG 吉祥物元件
 │       │   ├── ProtectedRoute.tsx
 │       │   ├── QRCodeDisplay.tsx
-│       │   ├── RoomCodeInput.tsx
+│       │   ├── RoomCodeInput.tsx   ← 學生輸入房間碼（紫色按鈕）
 │       │   └── questions/
-│       │       ├── PollQuestion.tsx
-│       │       ├── PollResult.tsx
-│       │       ├── OpenEndedQuestion.tsx
-│       │       ├── OpenEndedResult.tsx
-│       │       ├── WordCloudQuestion.tsx
-│       │       ├── WordCloudResult.tsx
-│       │       ├── ScalesQuestion.tsx
-│       │       ├── ScalesResult.tsx
-│       │       ├── RankingQuestion.tsx
-│       │       └── RankingResult.tsx
+│       │       ├── PollQuestion.tsx / PollResult.tsx
+│       │       ├── OpenEndedQuestion.tsx / OpenEndedResult.tsx
+│       │       ├── WordCloudQuestion.tsx / WordCloudResult.tsx
+│       │       ├── ScalesQuestion.tsx / ScalesResult.tsx
+│       │       └── RankingQuestion.tsx / RankingResult.tsx
 │       ├── hooks/
 │       │   └── useSocket.ts
 │       ├── lib/
 │       │   ├── supabase.ts
 │       │   └── socket.ts
 │       └── pages/
-│           ├── TeacherLogin.tsx    ← 登入／註冊
+│           ├── HomePage.tsx        ← 首頁（教師/學生 CTA、六種題型卡片）
+│           ├── TeacherLogin.tsx    ← 登入／註冊／忘記密碼
 │           ├── TeacherDashboard.tsx ← 教師後台（活動管理）
 │           ├── TeacherPresent.tsx  ← 教師投影畫面
 │           ├── TeacherResults.tsx  ← 查看歷史結果
-│           ├── StudentJoin.tsx     ← 學生輸入房間碼
+│           ├── StudentJoin.tsx     ← 學生輸入房間碼（含返回首頁）
 │           └── StudentAnswer.tsx   ← 學生作答
 └── backend/
     ├── package.json
     └── src/
-        ├── index.ts               ← 伺服器進入點（port 3001）
+        ├── index.ts               ← 伺服器進入點 + Supabase keep-alive（每 5 天）
         ├── shared.ts              ← prebuild 複製自 packages/shared/types.ts
         ├── lib/supabase.ts
         ├── middleware/auth.ts     ← JWT 驗證 middleware
@@ -109,15 +113,15 @@ mentimeter-edu/
 ## 路由對照
 
 ### 前端頁面路由
-| 路徑 | 說明 |
-|------|------|
-| `/` | 重新導向到 `/teacher` |
-| `/login` | 教師登入／註冊 |
-| `/teacher` | 教師後台（需登入） |
-| `/teacher/present/:activityId` | 教師投影畫面（需登入） |
-| `/teacher/results/:activityId` | 查看歷史結果（需登入） |
-| `/join` | 學生輸入房間碼 |
-| `/answer/:roomCode` | 學生作答 |
+| 路徑 | 元件 | 說明 |
+|------|------|------|
+| `/` | `HomePage` | 首頁（教師/學生 CTA、六種題型說明） |
+| `/login` | `TeacherLogin` | 教師登入／註冊／忘記密碼 |
+| `/teacher` | `TeacherDashboard` | 教師後台（需登入） |
+| `/teacher/present/:activityId` | `TeacherPresent` | 教師投影畫面（需登入） |
+| `/teacher/results/:activityId` | `TeacherResults` | 查看歷史結果（需登入） |
+| `/join` | `StudentJoin` | 學生輸入房間碼（含返回首頁） |
+| `/answer/:roomCode` | `StudentAnswer` | 學生作答 |
 
 ### 後端 API
 | 方法 | 路徑 | 說明 |
@@ -130,6 +134,20 @@ mentimeter-edu/
 | GET | `/activities/:id/results` | 取得活動結果 |
 | POST | `/questions` | 新增題目 |
 | GET | `/health` | 健康檢查 |
+
+---
+
+## UI 設計規範
+
+| 元素 | 規格 |
+|------|------|
+| 品牌色（教師） | `from-indigo-500 to-purple-600` 漸層 |
+| 品牌色（學生） | `from-emerald-400 to-green-500` 漸層 |
+| 背景 | `from-indigo-50 via-purple-50 to-pink-50` |
+| 吉祥物 | `<BearLogo size={N} />` SVG，統一使用，不用 🐻 emoji |
+| 按鈕圓角 | `rounded-2xl` |
+| 卡片圓角 | `rounded-2xl` 或 `rounded-3xl` |
+| 六種題型標籤 | 文字雲、單選投票、開放作答、量尺評分、排序競賽、計時作答（純中文） |
 
 ---
 
@@ -221,31 +239,31 @@ CREATE INDEX idx_answers_question_id ON answers(question_id);
 ### frontend/.env.local
 ```
 VITE_SUPABASE_URL=https://cmeiwebdaavcurzivegm.supabase.co
-VITE_SUPABASE_ANON_KEY=（legacy JWT anon key）
-VITE_BACKEND_URL=http://localhost:3001
+VITE_SUPABASE_ANON_KEY=（anon key）
+VITE_BACKEND_URL=https://（Railway 後端網址）
 ```
 
-### backend/.env
+### backend/.env（Railway 環境變數設定）
 ```
 SUPABASE_URL=https://cmeiwebdaavcurzivegm.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=（legacy JWT service role key）
+SUPABASE_SERVICE_ROLE_KEY=（service role key）
 PORT=3001
-FRONTEND_URL=http://localhost:5173,http://localhost:5174
+FRONTEND_URL=https://mentimeter-edu.vercel.app
 ```
 
 ---
 
-## 啟動開發伺服器
+## 啟動開發伺服器（本機）
 
-```
-cd C:\Users\Roki\mentimeter-edu
+```bash
+cd "G:\google drive\Dropbox (十年磨一劍)\0000000000數位教材\APP\Mentimeter_Prayer\mentimeter-edu"
 npm run dev
 ```
 
-- 前端：http://localhost:5173（若被佔用會自動往上找）
-- 後端：http://localhost:3001（若被佔用需手動 kill）
+- 前端：http://localhost:5173
+- 後端：http://localhost:3001
 
-### 若 port 3001 被佔用
+### 若 port 3001 被佔用（Windows）
 ```
 netstat -ano | findstr :3001
 taskkill /PID <PID號碼> /F
@@ -257,24 +275,30 @@ taskkill /PID <PID號碼> /F
 
 ### 已完成
 - [x] 教師註冊／登入（Supabase Auth）
+- [x] 忘記密碼（Supabase resetPasswordForEmail）
 - [x] 建立、編輯名稱、刪除活動
 - [x] 自動產生 6 碼房間碼與 QR Code
-- [x] 新增題目：Poll、Open Ended、Word Cloud、Scales、Ranking
+- [x] 新增題目：單選投票、開放作答、文字雲、量尺評分、排序競賽
 - [x] 題目計時器（10/20/30/60/90 秒，時間到自動關閉）
 - [x] 學生用房間碼加入（匿名，localStorage sessionId）
 - [x] 教師推送題目到學生端（Socket.io）
 - [x] 學生即時作答，教師投影畫面即時更新
-- [x] Poll 結果 Recharts 長條圖
-- [x] Open Ended 滾動文字列表
-- [x] Word Cloud、Scales、Ranking 結果顯示
+- [x] 各題型結果圖表（長條圖、文字列表、文字雲、量尺、排序）
 - [x] 歷史結果查看頁面
 - [x] 基本 RWD（學生端手機適配）
+- [x] 前端部署：Vercel（`main` 分支）
+- [x] 後端部署：Railway（`master` 分支，`zucchini-amazement`）
+- [x] Supabase keep-alive（後端每 5 天自動 ping，防止免費方案閒置暫停）
+- [x] 首頁品牌設計（黑熊吉祥物、教師/學生 CTA 顏色區分）
+- [x] 登入頁品牌統一（黑熊 SVG、紫色漸層）
+- [x] 六種題型說明 Tooltip（hover 顯示）
+- [x] 學生加入頁返回首頁按鈕
 
 ### 待完成
-- [ ] 部署：後端 Railway、前端 Vercel
 - [ ] AI 自動出題（Claude API）
 - [ ] 結果匯出 PDF
 - [ ] Pin on Image 題型
+- [ ] 計時作答（TimedQuestion）完整實作
 
 ---
 
@@ -295,9 +319,10 @@ taskkill /PID <PID號碼> /F
 ## 給 Claude Code 的任務指引
 
 每次接到新任務時，請依序確認：
-1. 此功能屬於前端、後端，還是兩端都需修改？
+1. 此功能屬於前端（`main` 分支）、後端（`master` 分支），還是兩端都需修改？
 2. 是否需要新增或修改 `packages/shared/types.ts` 的型別？
 3. 是否涉及 Socket.io 事件？若是，確保前後端事件名稱與 payload 一致。
 4. 是否需要新增 Supabase 資料表或欄位？若是，提供對應的 migration SQL。
 5. 後端 `src/shared.ts` 是 prebuild 自動複製的，不要直接編輯它。
-6. 完成後確認 TypeScript 無型別錯誤。
+6. UI 修改需符合品牌設計規範（indigo/purple/emerald 色系、BearLogo 元件）。
+7. 完成後確認 TypeScript 無型別錯誤。
