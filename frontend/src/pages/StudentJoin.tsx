@@ -18,11 +18,17 @@ export default function StudentJoin() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-br from-purple-50 to-blue-100 flex flex-col">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex flex-col">
       {/* 頂部品牌列 */}
       <header className="px-4 pt-[env(safe-area-inset-top)] pb-0">
-        <div className="py-3 text-center">
-          <span className="text-sm font-semibold text-blue-700 tracking-wide">🐻 熊學堂</span>
+        <div className="py-3 flex items-center relative">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-1 text-sm font-semibold text-indigo-500 hover:text-indigo-700 transition-colors"
+          >
+            ← 返回首頁
+          </button>
+          <span className="text-sm font-semibold text-purple-700 absolute left-1/2 -translate-x-1/2">🐻 熊學堂</span>
         </div>
       </header>
 

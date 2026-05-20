@@ -2,12 +2,12 @@ import { useNavigate } from 'react-router-dom'
 import BearLogo from '../components/BearLogo'
 
 const FEATURES = [
-  { icon: '☁️', label: '文字雲', color: 'bg-pink-100 border-pink-300', text: 'text-pink-600' },
-  { icon: '📊', label: '單選投票', color: 'bg-blue-100 border-blue-300', text: 'text-blue-600' },
-  { icon: '💬', label: '開放作答', color: 'bg-purple-100 border-purple-300', text: 'text-purple-600' },
-  { icon: '🎚️', label: '量尺評分', color: 'bg-orange-100 border-orange-300', text: 'text-orange-600' },
-  { icon: '🏆', label: '排序競賽', color: 'bg-green-100 border-green-300', text: 'text-green-600' },
-  { icon: '⏱️', label: '計時作答', color: 'bg-yellow-100 border-yellow-300', text: 'text-yellow-600' },
+  { icon: '☁️', label: '文字雲',   desc: '學生輸入關鍵字，高頻詞彙自動放大顯示', color: 'bg-pink-100 border-pink-300',     text: 'text-pink-600'   },
+  { icon: '📊', label: '單選投票', desc: '老師出選擇題，學生單選，結果即時長條圖呈現', color: 'bg-blue-100 border-blue-300',     text: 'text-blue-600'   },
+  { icon: '💬', label: '開放作答', desc: '學生自由輸入想法，所有回答滾動列表顯示', color: 'bg-purple-100 border-purple-300', text: 'text-purple-600' },
+  { icon: '🎚️', label: '量尺評分', desc: '學生在滑桿上評分，統計平均值與分布', color: 'bg-orange-100 border-orange-300', text: 'text-orange-600' },
+  { icon: '🏆', label: '排序競賽', desc: '學生對選項排出優先順序，彙整眾人排名', color: 'bg-green-100 border-green-300',   text: 'text-green-600'  },
+  { icon: '⏱️', label: '計時作答', desc: '設定倒數秒數，時間到自動收回答案', color: 'bg-yellow-100 border-yellow-300', text: 'text-yellow-600' },
 ]
 
 export default function HomePage() {
@@ -76,13 +76,18 @@ export default function HomePage() {
         <div className="mb-16">
           <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">六種互動題型</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {FEATURES.map(({ icon, label, color, text }) => (
+            {FEATURES.map(({ icon, label, desc, color, text }) => (
               <div
                 key={label}
-                className={`${color} border-2 rounded-2xl p-4 flex flex-col items-center gap-2 hover:scale-105 transition-transform cursor-default`}
+                className={`${color} border-2 rounded-2xl p-4 flex flex-col items-center gap-2 hover:scale-105 transition-transform group relative cursor-default`}
               >
                 <span className="text-3xl">{icon}</span>
                 <span className={`text-sm font-bold ${text}`}>{label}</span>
+                {/* 說明提示：hover 時顯示 */}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-44 bg-gray-800 text-white text-xs rounded-xl px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center leading-relaxed shadow-lg">
+                  {desc}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800" />
+                </div>
               </div>
             ))}
           </div>
