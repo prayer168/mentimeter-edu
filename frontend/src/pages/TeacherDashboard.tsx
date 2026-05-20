@@ -278,7 +278,7 @@ export default function TeacherDashboard() {
             </button>
             <span className="text-xs text-gray-400 hidden lg:block max-w-[100px] truncate">{user?.email}</span>
             <button
-              onClick={() => signOut()}
+              onClick={async () => { await signOut(); navigate('/') }}
               className="text-xs px-2.5 py-1.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
             >
               登出
