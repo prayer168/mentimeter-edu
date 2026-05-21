@@ -267,8 +267,17 @@ export default function TeacherDashboard() {
               {activity ? activity.title : '教師後台'}
             </span>
           </div>
-          {/* 右：課堂工具 + 登出 */}
+          {/* 右：科學教材 + 課堂工具 + 登出 */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <a
+              href="https://prayer168.github.io/science-portal/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl text-xs sm:text-sm shadow hover:opacity-90 hover:scale-105 transition-all"
+              title="黑熊老師自然科學數位教材中心"
+            >
+              🔬 <span className="hidden sm:inline">科學教材</span>
+            </a>
             <button
               onClick={() => setShowTools(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl text-xs sm:text-sm shadow hover:opacity-90 hover:scale-105 transition-all"
