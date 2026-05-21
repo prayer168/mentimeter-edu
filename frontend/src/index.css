@@ -34,6 +34,43 @@
   animation: subtlePulse 2.4s ease-in-out infinite;
 }
 
+/* 按鈕流動白色邊框 */
+@property --btn-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes btnBorderRun {
+  to { --btn-angle: 360deg; }
+}
+.btn-run-border {
+  position: relative;
+  isolation: isolate;
+}
+.btn-run-border::before {
+  content: '';
+  position: absolute;
+  inset: -2.5px;
+  border-radius: 14px;
+  background: conic-gradient(
+    from var(--btn-angle),
+    transparent 0%,
+    transparent 68%,
+    rgba(255,255,255,0.55) 76%,
+    white 84%,
+    rgba(255,255,255,0.55) 92%,
+    transparent 100%
+  );
+  opacity: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.btn-run-border:hover::before {
+  opacity: 1;
+  animation: btnBorderRun 1.6s linear infinite;
+}
+
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900;

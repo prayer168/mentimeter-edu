@@ -41,15 +41,15 @@ export default function HomePage() {
               href="https://prayer168.github.io/science-portal/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl text-xs sm:text-sm shadow hover:opacity-90 hover:scale-105 transition-all"
+              className="btn-run-border flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl text-xs sm:text-sm shadow hover:opacity-90 hover:scale-105 transition-all"
               title="黑熊老師自然科學數位教材中心"
             >
               🔬 <span className="hidden sm:inline">黑熊老師自然科學數位教材中心</span>
             </a>
-            <ClassroomToolsButton onClick={() => setShowTools(true)} size="sm" />
+            <div className="btn-run-border rounded-xl"><ClassroomToolsButton onClick={() => setShowTools(true)} size="sm" /></div>
             <button
               onClick={() => navigate('/login')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl text-xs sm:text-sm shadow hover:opacity-90 hover:scale-105 transition-all"
+              className="btn-run-border flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl text-xs sm:text-sm shadow hover:opacity-90 hover:scale-105 transition-all"
             >
               🔑 <span className="hidden sm:inline">教師登入</span>
             </button>
