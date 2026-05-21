@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BearLogo from '../components/BearLogo'
-import ClassroomToolsButton from '../components/ClassroomToolsButton'
 import ClassroomToolsModal from '../components/ClassroomToolsModal'
 
 const FEATURES = [
@@ -46,7 +45,13 @@ export default function HomePage() {
             >
               🔬 <span className="hidden sm:inline">黑熊老師自然科學數位教材中心</span>
             </a>
-            <div className="btn-run-border rounded-xl"><ClassroomToolsButton onClick={() => setShowTools(true)} size="sm" /></div>
+            <button
+              onClick={() => setShowTools(true)}
+              className="btn-run-border flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white font-semibold rounded-xl text-xs sm:text-sm shadow hover:opacity-90 hover:scale-105 transition-all"
+              title="開啟課堂工具"
+            >
+              🛠️ <span className="hidden sm:inline">課堂工具</span>
+            </button>
             <button
               onClick={() => navigate('/login')}
               className="btn-run-border flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl text-xs sm:text-sm shadow hover:opacity-90 hover:scale-105 transition-all"
