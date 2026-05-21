@@ -45,9 +45,9 @@ export default function HomePage() {
             <ClassroomToolsButton onClick={() => setShowTools(true)} size="sm" />
             <button
               onClick={() => navigate('/login')}
-              className="px-3 py-1.5 sm:px-5 sm:py-2 text-sm font-semibold text-indigo-600 border-2 border-indigo-300 rounded-xl hover:bg-indigo-50 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl text-xs sm:text-sm shadow hover:opacity-90 hover:scale-105 transition-all"
             >
-              教師登入
+              🔑 <span className="hidden sm:inline">教師登入</span>
             </button>
           </div>
         </div>
