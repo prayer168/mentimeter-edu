@@ -23,13 +23,17 @@ export default function HomePage() {
       {/* Header */}
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 p-1 shadow-md">
-              <BearLogo size={36} />
+          <div className="flex items-center gap-3">
+            <div className="animate-float rounded-2xl bg-gradient-to-br from-indigo-400 to-purple-500 p-1.5 shadow-lg">
+              <BearLogo size={42} />
             </div>
-            <div>
-              <h1 className="text-base font-extrabold text-indigo-800 leading-none">熊學堂</h1>
-              <span className="text-[10px] font-bold text-purple-500 tracking-widest hidden sm:block">互動課堂工具</span>
+            <div className="flex flex-col gap-0.5">
+              <h1 className="text-shimmer text-xl sm:text-2xl font-extrabold leading-none tracking-tight">
+                熊學堂
+              </h1>
+              <span className="animate-subtle-pulse text-[11px] sm:text-xs font-bold text-purple-400 tracking-[0.2em] hidden sm:block">
+                互動課堂工具
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-2">

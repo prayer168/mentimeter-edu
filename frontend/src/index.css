@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 熊學堂 Logo 輕柔漂浮 */
+@keyframes floatBob {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-5px); }
+}
+.animate-float {
+  animation: floatBob 2.8s ease-in-out infinite;
+}
+
+/* 品牌名稱光澤流動 */
+@keyframes shimmerSlide {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.text-shimmer {
+  background: linear-gradient(90deg, #3730a3 0%, #7c3aed 30%, #a78bfa 50%, #7c3aed 70%, #3730a3 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerSlide 3.5s linear infinite;
+}
+
+/* 副標題輕閃 */
+@keyframes subtlePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
+}
+.animate-subtle-pulse {
+  animation: subtlePulse 2.4s ease-in-out infinite;
+}
+
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900;
