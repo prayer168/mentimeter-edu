@@ -33,6 +33,15 @@ export default function HomePage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <a
+              href="https://prayer168.github.io/science-portal/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl text-xs sm:text-sm shadow hover:opacity-90 hover:scale-105 transition-all"
+              title="黑熊老師自然科學數位教材中心"
+            >
+              🔬 <span className="hidden sm:inline">黑熊老師自然科學數位教材中心</span>
+            </a>
             <ClassroomToolsButton onClick={() => setShowTools(true)} size="sm" />
             <button
               onClick={() => navigate('/login')}
