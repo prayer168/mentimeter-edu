@@ -276,7 +276,7 @@ export default function TeacherDashboard() {
               className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl text-xs sm:text-sm shadow hover:opacity-90 hover:scale-105 transition-all"
               title="黑熊老師自然科學數位教材中心"
             >
-              🔬 <span className="hidden sm:inline">科學教材</span>
+              🔬 <span className="hidden sm:inline">黑熊老師自然科學數位教材中心</span>
             </a>
             <button
               onClick={() => setShowTools(true)}
